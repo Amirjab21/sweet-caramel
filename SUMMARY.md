@@ -1,26 +1,6 @@
 # Summary
 * contracts
   * core
-    * dao
-      * [BeneficiaryGovernance](docs/core/dao/BeneficiaryGovernance.md)
-      * [BeneficiaryRegistry](docs/core/dao/BeneficiaryRegistry.md)
-      * [BeneficiaryVaults](docs/core/dao/BeneficiaryVaults.md)
-      * [GrantElections](docs/core/dao/GrantElections.md)
-      * [Staking](docs/core/dao/Staking.md)
-    * defi
-      * hysi_batch
-        * [HysiBatchInteraction](docs/core/defi/hysi_batch/HysiBatchInteraction.md)
-        * [HysiBatchZapper](docs/core/defi/hysi_batch/HysiBatchZapper.md)
-      * pool
-        * [AffiliateToken](docs/core/defi/pool/AffiliateToken.md)
-        * [Pool](docs/core/defi/pool/Pool.md)
     * utils
       * [ACLRegistry](docs/core/utils/ACLRegistry.md)
       * [ContractRegistry](docs/core/utils/ContractRegistry.md)
-      * [KeeperIncentive](docs/core/utils/KeeperIncentive.md)
-      * [ParticipationReward](docs/core/utils/ParticipationReward.md)
-      * [RandomNumberConsumer](docs/core/utils/RandomNumberConsumer.md)
-      * [Region](docs/core/utils/Region.md)
-      * [RewardsEscrow](docs/core/utils/RewardsEscrow.md)
-      * [RewardsManager](docs/core/utils/RewardsManager.md)
-      * [Zapper](docs/core/utils/Zapper.md)
