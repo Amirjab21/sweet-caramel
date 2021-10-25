@@ -1,12 +1,18 @@
+import { Meta, Story } from '@storybook/react/types-6-0';
 import React from 'react';
-import { Story, Meta } from '@storybook/react/types-6-0';
-import Container from '../Grid/FullHeightContainer';
-import  { Rocket } from ".";
+import { Rocket } from '.';
+import Container from '../../Grid/FullHeightContainer';
 
 export default {
   title: 'Animations/Rocket',
   component: Rocket,
-  decorators: [(Story) => (<Container><Story /></Container>)]
+  decorators: [
+    (Story) => (
+      <Container>
+        <Story />
+      </Container>
+    ),
+  ],
 } as Meta;
 
 const Template: Story = (args) => <Rocket />;
