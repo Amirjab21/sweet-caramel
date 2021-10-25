@@ -1,4 +1,4 @@
-import { TimeTillBatchProcessing } from '@popcorn/contracts';
+import { TimeTillBatchProcessing } from '@popcorn/hardhat';
 import CircularProgressbar from 'react-circular-progressbar';
 
 interface BatchProcessingInfoProps {

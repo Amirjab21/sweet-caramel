@@ -3,7 +3,7 @@ import { parseEther } from '@ethersproject/units';
 import {
   AccountBatch,
   BatchType,
-} from '@popcorn/contracts/adapters/HYSIBatchInteraction/HYSIBatchInteractionAdapter';
+} from '@popcorn/hardhat/adapters/HYSIBatchInteraction/HYSIBatchInteractionAdapter';
 import { useWeb3React } from '@web3-react/core';
 import BatchProcessingInfo from 'components/BatchHysi/BatchProcessingInfo';
 import ClaimableBatches from 'components/BatchHysi/ClaimableBatches';
@@ -17,7 +17,7 @@ import {
   ComponentMap,
   HYSIBatchInteractionAdapter,
   TimeTillBatchProcessing,
-} from '../../../contracts';
+} from '../../../hardhat';
 
 interface HotSwapParameter {
   batchIds: String[];

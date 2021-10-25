@@ -2,7 +2,7 @@ import { BigNumber } from '@ethersproject/bignumber';
 import {
   AccountBatch,
   BatchType,
-} from '@popcorn/contracts/adapters/HYSIBatchInteraction/HYSIBatchInteractionAdapter';
+} from '@popcorn/hardhat/adapters/HYSIBatchInteraction/HYSIBatchInteractionAdapter';
 import { bigNumberToNumber } from '@popcorn/utils';
 
 interface BatchProps {
