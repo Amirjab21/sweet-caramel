@@ -1,9 +1,9 @@
 import { Web3Provider } from '@ethersproject/providers';
 import { parseEther } from '@ethersproject/units';
-import {
+import HYSIBatchInteractionAdapter, {
   AccountBatch,
   BatchType,
-} from '@popcorn/hardhat/adapters/HYSIBatchInteraction/HYSIBatchInteractionAdapter';
+} from '@popcorn/hardhat/lib/adapters/HYSIBatchInteraction/HYSIBatchInteractionAdapter';
 import { useWeb3React } from '@web3-react/core';
 import BatchProcessingInfo from 'components/BatchHysi/BatchProcessingInfo';
 import ClaimableBatches from 'components/BatchHysi/ClaimableBatches';
@@ -13,11 +13,7 @@ import { ContractsContext } from 'context/Web3/contracts';
 import { BigNumber, Contract, utils } from 'ethers';
 import { useContext, useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import {
-  ComponentMap,
-  HYSIBatchInteractionAdapter,
-  TimeTillBatchProcessing,
-} from '../../../hardhat';
+import { ComponentMap, TimeTillBatchProcessing } from '../../../hardhat';
 
 interface HotSwapParameter {
   batchIds: String[];
