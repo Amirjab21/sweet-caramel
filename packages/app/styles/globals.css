@@ -27,7 +27,7 @@ p {
     font-family: 'Avenir Next LT Pro';
     font-weight: 400;
     src: local('Avenir Next LT Pro'),
-      url(/fonts/Avenir_Next_LT_Pro/AvenirNextLTPro-It.woff) format('woff');
+      url(/fonts/Avenir_Next_LT_Pro/AvenirNextLTPro-lt.woff) format('woff');
   }
   @font-face {
     font-family: 'Avenir Next LT Pro';
@@ -111,4 +111,23 @@ p {
   /* background-color: #e5e7eb; */
   border-color: #636363;
   color: #636363;
+}
+
+.discord:hover {
+  filter: invert(30%) sepia(34%) saturate(5612%) hue-rotate(215deg)
+    brightness(95%) contrast(93%);
+}
+
+.impact-background {
+  background-repeat: no-repeat;
+  background-size: contain, cover;
+  background-position: center;
+}
+
+@media only screen and (min-width: 1280px) {
+  .impact-background {
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+  }
 }

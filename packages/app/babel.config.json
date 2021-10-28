@@ -5,7 +5,7 @@
       "module-resolver",
       {
         "alias": {
-          "@popcorn/ui": "../ui/src",
+          "@popcorn/ui": "../ui",
           "@popcorn/utils": "../utils",
           "@popcorn/hardhat": "../contracts",
           "containers": "./containers",

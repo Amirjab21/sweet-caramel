@@ -25,14 +25,16 @@ module.exports = {
         101: '1.01',
         102: '1.02',
       },
+      rotate: {
+        '-30': '-30deg',
+      },
       colors: {
-        primary: '#F28705',
-        primaryLight: '#FDEAA7 ',
-        primaryDark: '#BF4904',
+        primary: '#FDEAA7',
+        primaryLight: '#FFF5CF',
 
-        secondary: '#B72E73',
-        secondaryLight: '#D5264E',
-        secondaryDark: '#8739B0',
+        secondary: '#73B7EA',
+        secondaryLight: '#DBEAFE',
+        secondaryDark: '#25283D',
 
         ctaYellow: '#F6CB22',
         ctaYellowLight: '#FFD324',
@@ -53,5 +55,5 @@ module.exports = {
   variants: {
     extend: { opacity: ['disabled'] },
   },
-  plugins: [require('@tailwindcss/forms')],
+  plugins: [],
 };
