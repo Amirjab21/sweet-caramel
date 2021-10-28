@@ -44,10 +44,19 @@ module.exports = {
   poweredByHeader: false,
   webpack: (config, options) => {
     /** Allows import modules from packages in workspace. */
-    //config.externals = { ...config.externals, electron: 'electron' };
     config.module = {
       ...config.module,
       rules: [
+        {
+          test: /\.svg$/,
+          use: [
+            {
+              loader: '@svgr/webpack',
+              options: { svgo: false },
+            },
+            'file-loader',
+          ],
+        },
         ...config.module.rules,
         {
           test: /\.(js|jsx|ts|tsx)$/,
