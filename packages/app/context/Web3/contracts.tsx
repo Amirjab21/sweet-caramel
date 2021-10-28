@@ -32,7 +32,7 @@ import {
   UniswapV2Router02__factory,
   YearnVault,
   YearnVault__factory,
-} from '../../../contracts/typechain';
+} from '../../../hardhat/typechain';
 import { setSingleActionModal } from '../actions';
 import { store } from '../store';
 import { connectors, networkMap } from './connectors';
