@@ -2,14 +2,14 @@ import { Web3Provider } from '@ethersproject/providers';
 import { useWeb3React } from '@web3-react/core';
 import DropdownSelect from 'components/DropdownSelect';
 import MainActionButton from 'components/MainActionButton';
+import NavBar from 'components/NavBar/NavBar';
+import { connectors } from 'context/Web3/connectors';
+import { ContractsContext } from 'context/Web3/contracts';
 import { utils } from 'ethers';
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
-import NavBar from '../../components/NavBar/NavBar';
-import { connectors } from '../../context/Web3/connectors';
-import { ContractsContext } from '../../context/Web3/contracts';
 
 const ONE_WEEK = 604800;
 const lockPeriods = [
