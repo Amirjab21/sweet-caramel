@@ -43,6 +43,7 @@ contract AirdropDistributor {
     bytes32[] calldata merkleProof
   ) external {
     bytes32 node = keccak256(abi.encodePacked(index, account, amount));
+    require(!isClaimed(airdropId, index), "Already claimed.");
     require(
       MerkleProof.verify(merkleProof, airdrops[airdropId].merkleRoot, node),
       "Invalid proof."

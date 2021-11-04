@@ -180,10 +180,128 @@ describe("AirdropDistributor", () => {
         await expectValue(await airdropDistributor.isClaimed(1, 0), false);
         await expectValue(await airdropDistributor.isClaimed(1, 1), false);
         await airdropDistributor
-          .connect(claimer1)
+          .connect(claimer0)
           .claim(1, 0, claimer0.address, parseEther("100"), proof0);
         await expectValue(await airdropDistributor.isClaimed(1, 0), true);
         await expectValue(await airdropDistributor.isClaimed(1, 1), false);
+      });
+
+      context("double claims", () => {
+        it("prevents double claims", async () => {
+          const proof0 = tree.getProof(0, claimer0.address, parseEther("100"));
+          await airdropDistributor
+            .connect(claimer0)
+            .claim(1, 0, claimer0.address, parseEther("100"), proof0);
+          await expectRevert(
+            airdropDistributor
+              .connect(claimer0)
+              .claim(1, 0, claimer0.address, parseEther("100"), proof0),
+            "Already claimed."
+          );
+        });
+
+        it("prevents double claims with intermediate claims: 0 then 1", async () => {
+          const proof0 = tree.getProof(0, claimer0.address, parseEther("100"));
+          await airdropDistributor
+            .connect(claimer0)
+            .claim(1, 0, claimer0.address, parseEther("100"), proof0);
+          const proof1 = tree.getProof(1, claimer1.address, parseEther("101"));
+          await airdropDistributor
+            .connect(claimer1)
+            .claim(1, 1, claimer1.address, parseEther("101"), proof1);
+          await expectRevert(
+            airdropDistributor
+              .connect(claimer0)
+              .claim(1, 0, claimer0.address, parseEther("100"), proof0),
+            "Already claimed."
+          );
+        });
+
+        it("prevents double claims with intermediate claims: 1 then 0", async () => {
+          const proof1 = tree.getProof(1, claimer1.address, parseEther("101"));
+          await airdropDistributor
+            .connect(claimer1)
+            .claim(1, 1, claimer1.address, parseEther("101"), proof1);
+          const proof0 = tree.getProof(0, claimer0.address, parseEther("100"));
+          await airdropDistributor
+            .connect(claimer0)
+            .claim(1, 0, claimer0.address, parseEther("100"), proof0);
+          await expectRevert(
+            airdropDistributor
+              .connect(claimer1)
+              .claim(1, 1, claimer1.address, parseEther("101"), proof1),
+            "Already claimed."
+          );
+        });
+      });
+
+      it("cannot claim for address other than proof", async () => {
+        const proof0 = tree.getProof(0, claimer0.address, parseEther("100"));
+        await expectRevert(
+          airdropDistributor
+            .connect(claimer0)
+            .claim(1, 1, claimer1.address, parseEther("101"), proof0),
+          "Invalid proof."
+        );
+      });
+
+      it("cannot claim more than proof", async () => {
+        const proof0 = tree.getProof(0, claimer0.address, parseEther("100"));
+        await expectRevert(
+          airdropDistributor
+            .connect(claimer0)
+            .claim(1, 0, claimer0.address, parseEther("101"), proof0),
+          "Invalid proof."
+        );
+      });
+    });
+
+    describe("larger tree", () => {
+      let tree: BalanceTree;
+      let wallets: SignerWithAddress[];
+
+      beforeEach(async () => {
+        wallets = await ethers.getSigners();
+        tree = new BalanceTree(
+          wallets.map((wallet, i) => {
+            return {
+              account: wallet.address,
+              amount: parseEther("100").add(parseEther((i + 1).toString())),
+            };
+          })
+        );
+        await airdropDistributor
+          .connect(admin)
+          .addAirdrop(mockToken.address, tree.getHexRoot());
+        await mockToken.mint(airdropDistributor.address, parseEther("10000"));
+      });
+
+      it("claims for each index", async () => {
+        await expectValue(
+          await mockToken.balanceOf(airdropDistributor.address),
+          parseEther("10000")
+        );
+
+        for (const i of wallets.keys()) {
+          const wallet = wallets[i];
+          const claimAmount = parseEther("100").add(
+            parseEther((i + 1).toString())
+          );
+          await expectValue(await mockToken.balanceOf(wallet.address), 0);
+          const proof = tree.getProof(i, wallet.address, claimAmount);
+          await airdropDistributor
+            .connect(wallet)
+            .claim(1, i, wallet.address, claimAmount, proof);
+          await expectValue(
+            await mockToken.balanceOf(wallet.address),
+            claimAmount
+          );
+        }
+
+        await expectValue(
+          await mockToken.balanceOf(airdropDistributor.address),
+          parseEther("7790")
+        );
       });
     });
   });
