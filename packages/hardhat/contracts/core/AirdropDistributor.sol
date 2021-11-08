@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 // author: Popcorn (https://popcorn.network)
 
-pragma solidity ^0.8.0;
+pragma solidity >=0.7.0 <0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/cryptography/MerkleProof.sol";
@@ -52,7 +52,7 @@ contract AirdropDistributor {
 
   /**
    * @notice Emitted when a caller claims a token allocation.
-   * @param airdropID ID of the token distribution.
+   * @param airdropId ID of the token distribution.
    * @param index Index of the claim in the Merkle tree.
    * @param account Address of the account associated with this claim.
    * @param amount Amount of tokens claimed.
@@ -76,7 +76,7 @@ contract AirdropDistributor {
 
   /**
    * @notice Claim a token allocation included in a given distribution.
-   * @param airdropID ID of the token distribution.
+   * @param airdropId ID of the token distribution.
    * @param index Index of the claim in the Merkle tree.
    * @param account Address of the account associated with this claim.
    * @param amount Amount of tokens claimed.
