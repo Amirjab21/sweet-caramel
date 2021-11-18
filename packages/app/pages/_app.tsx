@@ -1,5 +1,4 @@
 import { Web3Provider } from '@ethersproject/providers';
-import { Web3ReactProvider } from '@web3-react/core';
 import { Debug } from 'components/Debug';
 import { DualActionModalContainer } from 'components/Modal/DualActionModalContainer';
 import DualActionWideModalContainer from 'components/Modal/DualActionWideModalContainer';
@@ -58,19 +57,19 @@ export default function MyApp(props) {
           rel="stylesheet"
         ></link>
       </Head>
-      <Web3ReactProvider getLibrary={getLibrary}>
-        <StateProvider>
-          <ContractsWrapper>
-            <SingleActionModalContainer />
-            <DualActionModalContainer />
-            <DualActionWideModalContainer />
-            <Component {...pageProps} />
-            <SwapChainModal />
-            <NotificationsContainer />
-            <Debug />
-          </ContractsWrapper>
-        </StateProvider>
-      </Web3ReactProvider>
+      {/* <Web3ReactProvider getLibrary={getLibrary}> */}
+      <StateProvider>
+        <ContractsWrapper>
+          <SingleActionModalContainer />
+          <DualActionModalContainer />
+          <DualActionWideModalContainer />
+          <Component {...pageProps} />
+          <SwapChainModal />
+          <NotificationsContainer />
+          <Debug />
+        </ContractsWrapper>
+      </StateProvider>
+      {/* </Web3ReactProvider> */}
     </React.Fragment>
   );
 }

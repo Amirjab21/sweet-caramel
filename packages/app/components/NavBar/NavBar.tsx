@@ -1,23 +1,11 @@
-import { Web3Provider } from '@ethersproject/providers';
-import { useWeb3React } from '@web3-react/core';
+import useWeb3Modal from 'context/Web3/web3modal';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
-import { connectors } from '../../context/Web3/connectors';
 import NavbarLink from './NavbarLinks';
 
 const Navbar: React.FC = () => {
-  const context = useWeb3React<Web3Provider>();
-  const {
-    connector,
-    library,
-    chainId,
-    account,
-    activate,
-    deactivate,
-    active,
-    error,
-  } = context;
+  const [provider, loadWeb3Modal, logoutOfWeb3Modal, account] = useWeb3Modal();
   const router = useRouter();
   const [showGrants, setShowGrants] = useState(false);
   const [showProposals, setShowProposals] = useState(false);
@@ -63,7 +51,10 @@ const Navbar: React.FC = () => {
         </ul>
         <button
           className="w-28 p-1 flex flex-row items-center justify-center border border-gray-400 rounded hover:bg-indigo-400 hover:text-white"
-          onClick={() => activate(connectors.Injected)}
+          onClick={() => {
+            console.log('oke');
+            account ? logoutOfWeb3Modal() : loadWeb3Modal();
+          }}
         >
           <p>Connect{account && 'ed'}</p>
           {account && (
