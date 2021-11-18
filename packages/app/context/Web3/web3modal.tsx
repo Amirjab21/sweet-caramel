@@ -19,7 +19,7 @@ function useWeb3Modal(config: any = {}) {
 
   let web3Modal: Web3Modal;
   if (typeof window !== 'undefined') {
-    const Torus = require('@toruslabs/torus-embed').default;
+    // const Torus = require('@toruslabs/torus-embed').default;
 
     web3Modal = new Web3Modal({
       network: NETWORK_NAME,
@@ -58,19 +58,19 @@ function useWeb3Modal(config: any = {}) {
         authereum: {
           package: Authereum, // required
         },
-        torus: {
-          package: Torus,
-          options: {
-            networkParams: {
-              host: 'https://localhost:8545', // optional
-              chainId: 1, // optional
-              networkId: 1, // optional
-            },
-            config: {
-              buildEnv: 'development', // optional
-            },
-          },
-        },
+        // torus: {
+        //   package: Torus,
+        //   options: {
+        //     networkParams: {
+        //       host: 'https://localhost:8545', // optional
+        //       chainId: 1, // optional
+        //       networkId: 1, // optional
+        //     },
+        //     config: {
+        //       buildEnv: 'development', // optional
+        //     },
+        //   },
+        // },
         bitski: {
           package: Bitski, // required
           options: {
