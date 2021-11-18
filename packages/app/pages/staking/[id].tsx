@@ -194,7 +194,7 @@ export default function stake(): JSX.Element {
     // because parseEther breaks with exponential String
     const formattedToken = inputTokenAmount.toLocaleString().replace(/,/gi, '');
     const lockedTokenInEth = utils.parseEther(formattedToken);
-    const connected = await contracts.pop.connect(library.getSigner());
+    const connected = await contracts.pop.connect(provider.getSigner());
     await connected
       .approve(stakingInfo.stakingContract.address, lockedTokenInEth)
       .then((res) =>
