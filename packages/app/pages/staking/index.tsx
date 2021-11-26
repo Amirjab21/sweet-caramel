@@ -44,7 +44,8 @@ async function getUserBalances(
 }
 
 export default function index(): JSX.Element {
-  const [provider, loadWeb3Modal, logoutOfWeb3Modal, account] = useWeb3Modal();
+  const [provider, loadWeb3Modal, logoutOfWeb3Modal, account, web3Modal] =
+    useWeb3Modal();
   const { contracts } = useContext(ContractsContext);
   const [balances, setBalances] = useState<Balances>();
   const [stakingStats, setStakingStats] = useState<StakingStats>();
@@ -63,6 +64,8 @@ export default function index(): JSX.Element {
     getUserBalances(account, contracts).then((res) => setBalances(res));
   }, [account, contracts]);
 
+  console.log(web3Modal, ' LOL');
+
   return (
     <div className="w-full h-screen">
       <Navbar />
@@ -75,6 +78,7 @@ export default function index(): JSX.Element {
               <p className="text-lg text-gray-500">
                 Earn more income staking your crypto with us
               </p>
+              <p onClick={() => web3Modal.clearCachedProvider()}>clear cache</p>
             </div>
             <div className="bg-primaryLight rounded-xl pt-10 mr-12 mt-12">
               <img

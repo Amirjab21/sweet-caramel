@@ -5,12 +5,12 @@ import WalletConnectProvider from '@walletconnect/web3-provider';
 import Authereum from 'authereum';
 import { Bitski } from 'bitski';
 import Fortmatic from 'fortmatic';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import Web3Modal from 'web3modal';
 
 const INFURA_ID = process.env.INFURA_ID;
 
-const NETWORK_NAME = 'mainnet';
+const NETWORK_NAME = 'rinkeby';
 
 function useWeb3Modal(config: any = {}) {
   const [provider, setProvider] = useState<any>();
@@ -22,7 +22,7 @@ function useWeb3Modal(config: any = {}) {
     // const Torus = require('@toruslabs/torus-embed').default;
 
     web3Modal = new Web3Modal({
-      network: NETWORK_NAME,
+      // network: NETWORK_NAME,
       // disabledInjectedProvider: false,
       cacheProvider: false,
       providerOptions: {
@@ -52,7 +52,7 @@ function useWeb3Modal(config: any = {}) {
         fortmatic: {
           package: Fortmatic, // required
           options: {
-            key: 'pk_live_97D6F04B0DB13919',
+            key: 'pk_test_2FA53E901762CC1F',
           },
         },
         authereum: {
@@ -80,7 +80,20 @@ function useWeb3Modal(config: any = {}) {
         },
       },
     });
+
+    // web3Modal.clearCachedProvider()
   }
+
+  useEffect(() => {
+    async function getRid() {
+      // await provider.close();
+      await web3Modal.clearCachedProvider();
+      console.log('doneee');
+    }
+    // if (provider && provider.clo¿se){
+    getRid();
+    // }
+  }, [provider]);
 
   // Open wallet selection modal.
   const loadWeb3Modal = useCallback(async () => {
@@ -92,11 +105,14 @@ function useWeb3Modal(config: any = {}) {
     newProvider.on('chainChanged', (chainId) => {
       setChainId(chainId);
       setProvider(new Web3Provider(newProvider));
+      window.location.reload();
     });
 
     newProvider.on('accountChanged', () => {
       setProvider(new Web3Provider(newProvider));
+      window.location.reload();
     });
+    // await web3Modal.toggleModal();
   }, [web3Modal, account, setProvider]);
 
   const logoutOfWeb3Modal = useCallback(
@@ -115,7 +131,14 @@ function useWeb3Modal(config: any = {}) {
     [web3Modal],
   );
   console.log(provider, account);
-  return [provider, loadWeb3Modal, logoutOfWeb3Modal, account, chainId];
+  return [
+    provider,
+    loadWeb3Modal,
+    logoutOfWeb3Modal,
+    account,
+    chainId,
+    web3Modal,
+  ];
 }
 
 export default useWeb3Modal;
