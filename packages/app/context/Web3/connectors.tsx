@@ -39,3 +39,5 @@ const Network = new NetworkConnector({
 });
 
 export const connectors = { Injected, Network };
+
+export const supportedChainIds = [1, 4, 42161, 80001, 137, 31337, 1337];

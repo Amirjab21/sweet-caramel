@@ -1,9 +1,8 @@
 import { Web3Provider } from '@ethersproject/providers';
-import { StakingPoolInfo, getERC20Contract } from '@popcorn/utils';
-import {
-  StakingRewards,
-} from '@popcorn/hardhat/typechain';
-import { useWeb3React } from '@web3-react/core';
+import { StakingRewards } from '@popcorn/hardhat/typechain';
+import { getERC20Contract, StakingPoolInfo } from '@popcorn/utils';
+// import { useWeb3React } from '@web3-react/core';
+import { useWeb3React } from 'components/Web3ModalReact';
 import { updateStakingPageInfo } from 'context/actions';
 import { store } from 'context/store';
 import router from 'next/router';
@@ -24,13 +23,17 @@ export default function ({
   stakingPoolInfo,
   url,
   stakingContract,
-  index, stakedTokenAddress
+  index,
+  stakedTokenAddress,
 }: StakeCardProps): JSX.Element {
   const { library } = useWeb3React<Web3Provider>();
   const { dispatch } = useContext(store);
 
   const onSelectPool = useCallback(async () => {
-    const erc20 = await getERC20Contract(stakingPoolInfo.stakedTokenAddress, library);
+    const erc20 = await getERC20Contract(
+      stakingPoolInfo.stakedTokenAddress,
+      library,
+    );
     dispatch(
       updateStakingPageInfo({
         inputToken: erc20,
@@ -39,10 +42,17 @@ export default function ({
         poolInfo: stakingPoolInfo,
       }),
     );
-    sessionStorage.setItem('stakingPoolAddress', stakedTokenAddress)
-    sessionStorage.setItem('stakingPoolIndex', index.toString())
+    sessionStorage.setItem('stakingPoolAddress', stakedTokenAddress);
+    sessionStorage.setItem('stakingPoolIndex', index.toString());
     router.push(`staking/${url}`);
-  }, [router, getERC20Contract, stakingContract, tokenName, stakingPoolInfo.stakedTokenAddress, library]);
+  }, [
+    router,
+    getERC20Contract,
+    stakingContract,
+    tokenName,
+    stakingPoolInfo.stakedTokenAddress,
+    library,
+  ]);
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 shadow-md w-full mr-4 px-8 py-8">

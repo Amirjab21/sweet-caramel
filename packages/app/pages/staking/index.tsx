@@ -1,7 +1,7 @@
 import { Web3Provider } from '@ethersproject/providers';
-import { useWeb3React } from '@web3-react/core';
 import Navbar from 'components/NavBar/NavBar';
 import StatInfoCard from 'components/StatInfoCard';
+import { useWeb3React } from 'components/Web3ModalReact';
 import { Contracts, ContractsContext } from 'context/Web3/contracts';
 import { useContext, useEffect, useState } from 'react';
 import { Toaster } from 'react-hot-toast';

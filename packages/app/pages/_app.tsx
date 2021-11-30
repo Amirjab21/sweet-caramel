@@ -1,11 +1,12 @@
 import { Web3Provider } from '@ethersproject/providers';
-import { Web3ReactProvider } from '@web3-react/core';
 import { Debug } from 'components/Debug';
 import { DualActionModalContainer } from 'components/Modal/DualActionModalContainer';
 import DualActionWideModalContainer from 'components/Modal/DualActionWideModalContainer';
 import { SingleActionModalContainer } from 'components/Modal/SingleActionModalContainer';
 import NotificationsContainer from 'components/Notifications/NotificationsContainer';
 import SwapChainModal from 'components/SwapChainModal';
+// import { Web3ReactProvider } from '@web3-react/core';
+import { Web3ReactProvider } from 'components/Web3ModalReact/index';
 import Head from 'next/head';
 import Router from 'next/router';
 import React, { useEffect, useState } from 'react';

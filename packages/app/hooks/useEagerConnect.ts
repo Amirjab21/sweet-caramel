@@ -1,4 +1,4 @@
-import { useWeb3React } from '@web3-react/core';
+import { useWeb3React } from 'components/Web3ModalReact';
 import { connectors } from 'context/Web3/connectors';
 import { useEffect, useState } from 'react';
 
@@ -13,11 +13,11 @@ export default function useEagerConnect() {
 
       const isAuthorized = await connectors.Injected.isAuthorized();
       if (isAuthorized && eagerConnect === 'true') {
-        activate(connectors.Injected, undefined, true).catch(() => {
+        activate().catch(() => {
           setTried(true);
         });
       } else {
-        activate(connectors.Network, undefined, true).catch(() => {
+        activate().catch(() => {
           setTried(true);
         });
       }
