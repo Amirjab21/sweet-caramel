@@ -102,7 +102,6 @@ interface Web3ReactManagerState {
   provider?: any;
   chainId?: number;
   account?: null | string;
-  web3provider?: any;
 
   onError?: (error: Error) => void;
 
@@ -197,20 +196,12 @@ async function augmentConnectorUpdate(
   }
   // const account = _account === null ? _account : normalizeAccount(_account);
 
-  return { provider, chainId, account, web3provider };
+  return { provider, chainId, account };
 }
 
 export function useWeb3ReactManager(): Web3ReactManagerReturn {
   const [state, dispatch] = useReducer(reducer, {});
-  const {
-    connector,
-    provider,
-    chainId,
-    account,
-    onError,
-    error,
-    web3provider,
-  } = state;
+  const { connector, provider, chainId, account, onError, error } = state;
 
   let web3Modal;
   if (typeof window !== 'undefined') {
@@ -268,23 +259,12 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
   }, []);
 
   const deactivate = useCallback(async (): Promise<void> => {
-    await web3Modal.clearCachedProvider();
-
-    console.log('deactivating', provider, connector, web3provider, web3Modal);
     if (provider?.disconnect && typeof provider.disconnect === 'function') {
       console.log('here', provider);
       await provider.disconnect();
     }
-    if (
-      web3provider &&
-      web3provider.currentProvider &&
-      web3provider.currentProvider.close
-    ) {
-      await web3provider.currentProvider.close();
-    }
     dispatch({ type: ActionType.DEACTIVATE_CONNECTOR });
     await web3Modal.clearCachedProvider();
-    web3Modal.resetState();
   }, [provider]);
 
   const handleUpdate = useCallback(
