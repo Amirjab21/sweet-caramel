@@ -1,14 +1,15 @@
-import {
-  SingleActionModalProps,
-  DefaultSingleActionModalProps,
-} from 'components/Modal/SingleActionModal';
 import { DualActionModalProps } from 'components/Modal/DualActionModal';
-import { DefaultDualActionModalProps } from '../components/Modal/DualActionModal';
-import { NotificationProps } from '../components/Notifications/NotificationProps';
 import {
   DefaultDualActionWideModalProps,
   DualActionWideModalProps,
 } from 'components/Modal/DualActionWideModal';
+import {
+  DefaultSingleActionModalProps,
+  SingleActionModalProps,
+} from 'components/Modal/SingleActionModal';
+import { SetWeb3ProviderProps } from 'context/Web3/web3modal';
+import { DefaultDualActionModalProps } from '../components/Modal/DualActionModal';
+import { NotificationProps } from '../components/Notifications/NotificationProps';
 
 export const PUSH_NOTIFICATION = 'notifications/PUSH_NOTIFICATION';
 export const UNSET_NOTIFICATION = 'notifications/UNSET_NOTIFICATION';
@@ -17,6 +18,8 @@ export const CLEAR_NOTIFICATIONS = 'notifications/CLEAR_NOTIFICATIONS';
 export const SINGLE_ACTION_MODAL = 'modals/SINGLE_ACTION_MODAL';
 export const DUAL_ACTION_MODAL = 'modals/DUAL_ACTION_MODAL';
 export const DUAL_ACTION_WIDE_MODAL = 'modals/DUAL_ACTION_WIDE_MODAL';
+export const SET_WEB3_PROVIDER = 'modals/SET_WEB3_PROVIDER';
+export const RESET_WEB3_PROVIDER = 'modals/RESET_WEB3_PROVIDER';
 
 export type AppActions =
   | PushNotificationAction
@@ -25,7 +28,17 @@ export type AppActions =
   | ClearNotificationsAction
   | SetSingleActionModalAction
   | SetDualActionModalAction
-  | SetDualActionWideModalAction;
+  | SetDualActionWideModalAction
+  | SetWeb3ProviderAction
+  | ResetWeb3ProviderAction;
+
+export interface ResetWeb3ProviderAction {
+  type: typeof RESET_WEB3_PROVIDER;
+}
+export interface SetWeb3ProviderAction {
+  type: typeof SET_WEB3_PROVIDER;
+  payload: SetWeb3ProviderProps;
+}
 
 export interface PushNotificationAction {
   type: typeof PUSH_NOTIFICATION;

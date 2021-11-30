@@ -1,20 +1,33 @@
 // SPDX-License-Identifier: Apache-2.0
-import { Web3Provider } from '@ethersproject/providers';
 import Portis from '@portis/web3';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import Authereum from 'authereum';
 import { Bitski } from 'bitski';
+import { RESET_WEB3_PROVIDER, SET_WEB3_PROVIDER } from 'context/actions';
+import { providers } from 'ethers';
 import Fortmatic from 'fortmatic';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import Web3Modal from 'web3modal';
+import { store } from '../store';
+
+export interface SetWeb3ProviderProps {
+  provider: any;
+  web3Provider: any;
+  address: string;
+  chainId: number;
+}
 
 const INFURA_ID = process.env.INFURA_ID;
 
 const NETWORK_NAME = 'rinkeby';
 
 function useWeb3Modal(config: any = {}) {
-  const [provider, setProvider] = useState<any>();
-  const [account, setAccount] = useState('');
+  const { dispatch, state } = useContext(store);
+  const {
+    web3Provider: { provider, address: account, web3Provider },
+  } = state;
+  // const [provider, setProvider] = useState<any>();
+  // const [account, setAccount] = useState('');
   const [chainId, setChainId] = useState<number>();
 
   let web3Modal: Web3Modal;
@@ -84,61 +97,99 @@ function useWeb3Modal(config: any = {}) {
     // web3Modal.clearCachedProvider()
   }
 
-  useEffect(() => {
-    async function getRid() {
-      // await provider.close();
-      await web3Modal.clearCachedProvider();
-      console.log('doneee');
-    }
-    // if (provider && provider.clo¿se){
-    getRid();
-    // }
-  }, [provider]);
+  // useEffect(() => {
+  //   async function getRid() {
+  //     // await provider.close();
+  //     await web3Modal.clearCachedProvider();
+  //     console.log('doneee');
+  //   }
+  //   // if (provider && provider.clo¿se){
+  //   getRid();
+  //   // }
+  // }, [provider]);
 
   // Open wallet selection modal.
-  const loadWeb3Modal = useCallback(async () => {
-    const newProvider = await web3Modal.connect();
-    setProvider(new Web3Provider(newProvider));
-    setAccount(newProvider.selectedAddress);
-    setChainId(newProvider.networkVersion);
+  const loadWeb3Modal = useCallback(async function () {
+    const provider = await web3Modal.connect();
 
-    newProvider.on('chainChanged', (chainId) => {
-      setChainId(chainId);
-      setProvider(new Web3Provider(newProvider));
-      window.location.reload();
+    const web3Provider = new providers.Web3Provider(provider);
+    const signer = web3Provider.getSigner();
+    const address = await signer.getAddress();
+
+    const network = await web3Provider.getNetwork();
+    dispatch({
+      type: SET_WEB3_PROVIDER,
+      provider,
+      web3Provider,
+      web3Modal,
+      address,
+      chainId: network.chainId,
     });
 
-    newProvider.on('accountChanged', () => {
-      setProvider(new Web3Provider(newProvider));
-      window.location.reload();
-    });
     // await web3Modal.toggleModal();
-  }, [web3Modal, account, setProvider]);
+  }, []);
 
   const logoutOfWeb3Modal = useCallback(
     async function () {
-      setAccount('');
+      console.log('xexy', web3Provider);
       await web3Modal.clearCachedProvider();
       if (
-        provider &&
-        provider.provider &&
-        typeof provider.provider.disconnect == 'function'
+        web3Provider?.provider?.disconnect &&
+        typeof web3Provider.provider.disconnect === 'function'
       ) {
-        await provider.provider.disconnect();
+        await web3Provider.provider.disconnect();
+        console.log('disconnecto');
       }
-      window.location.reload();
+      dispatch({ type: RESET_WEB3_PROVIDER });
     },
-    [web3Modal],
+    [web3Provider],
   );
+
+  useEffect(() => {
+    if (provider?.on) {
+      const handleAccountsChanged = (accounts: string[]) => {
+        // eslint-disable-next-line no-console
+        console.log('accountsChanged', accounts);
+        // dispatch({
+        //   type: 'SET_ADDRESS',
+        //   address: accounts[0],
+        // })
+      };
+
+      // https://docs.ethers.io/v5/concepts/best-practices/#best-practices--network-changes
+      const handleChainChanged = (_hexChainId: string) => {
+        window.location.reload();
+      };
+
+      const handleDisconnect = (error: { code: number; message: string }) => {
+        // eslint-disable-next-line no-console
+        console.log('disconnect', error);
+        logoutOfWeb3Modal();
+      };
+
+      provider.on('accountsChanged', handleAccountsChanged);
+      provider.on('chainChanged', handleChainChanged);
+      provider.on('disconnect', handleDisconnect);
+
+      // Subscription Cleanup
+      return () => {
+        if (provider.removeListener) {
+          provider.removeListener('accountsChanged', handleAccountsChanged);
+          provider.removeListener('chainChanged', handleChainChanged);
+          provider.removeListener('disconnect', handleDisconnect);
+        }
+      };
+    }
+  }, [provider, logoutOfWeb3Modal]);
+
   console.log(provider, account);
-  return [
-    provider,
-    loadWeb3Modal,
-    logoutOfWeb3Modal,
-    account,
-    chainId,
-    web3Modal,
-  ];
+  return [loadWeb3Modal, logoutOfWeb3Modal];
 }
 
 export default useWeb3Modal;
+
+// export function useWeb3ModalV2() {
+//   return useContext()
+// }
+
+// export function createWeb3ModalRoot()

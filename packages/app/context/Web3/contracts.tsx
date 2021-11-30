@@ -56,9 +56,13 @@ function getErrorMessage(error: Error) {
 export default function ContractsWrapper({
   children,
 }: ContractsWrapperProps): JSX.Element {
-  const [provider, loadWeb3Modal, logoutOfWeb3Modal, account] = useWeb3Modal();
+  const [loadWeb3Modal, logoutOfWeb3Modal, account] = useWeb3Modal();
   const [contracts, setContracts] = useState<Contracts>();
-  const { dispatch } = useContext(store);
+  const { dispatch, state } = useContext(store);
+  console.log(state, 'state');
+  const {
+    web3Provider: { provider },
+  } = state;
 
   // useEffect(() => {
   //   if (!account) {
