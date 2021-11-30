@@ -18,7 +18,7 @@ import {
 } from '../../../hardhat/typechain';
 import { setSingleActionModal } from '../actions';
 import { store } from '../store';
-import { connectors, networkMap } from './connectors';
+import { networkMap } from './connectors';
 
 // TODO Move to Interface/Types
 type Address = string;
@@ -109,7 +109,7 @@ export default function ContractsWrapper({
 
   useEffect(() => {
     if (!active) {
-      activate(connectors.Network);
+      activate();
     }
   }, [active]);
 

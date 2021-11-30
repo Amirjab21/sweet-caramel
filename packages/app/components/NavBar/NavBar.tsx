@@ -6,7 +6,7 @@ import { useWeb3React } from 'components/Web3ModalReact';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
-import { connectors, networkMap } from '../../context/Web3/connectors';
+import { networkMap } from '../../context/Web3/connectors';
 import NavbarLink from './NavbarLinks';
 import NetworkOptionsMenu from './NetworkOptionsMenu';
 
@@ -90,7 +90,7 @@ const Navbar: React.FC = () => {
           <button
             className="ml-10 w-28 p-1 flex flex-row items-center justify-center border border-gray-400 rounded hover:bg-indigo-400 hover:text-white"
             onClick={() => {
-              activate(connectors.Injected);
+              activate();
               localStorage.setItem('eager_connect', 'true');
             }}
           >

@@ -15,7 +15,6 @@ import TokenIcon from 'components/TokenIcon';
 import { useWeb3React } from 'components/Web3ModalReact';
 import { updateStakingPageInfo } from 'context/actions';
 import { store } from 'context/store';
-import { connectors } from 'context/Web3/connectors';
 import { ContractsContext } from 'context/Web3/contracts';
 import { utils } from 'ethers';
 import { useRouter } from 'next/router';
@@ -409,7 +408,7 @@ export default function stake(): JSX.Element {
                     ) : (
                       <MainActionButton
                         label={'Connect Wallet'}
-                        handleClick={() => activate(connectors.Injected)}
+                        handleClick={() => activate()}
                       />
                     )}
                   </div>
