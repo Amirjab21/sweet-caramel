@@ -12,6 +12,10 @@ import {
 } from '../components/Modal/DualActionModal';
 import { SingleActionModalProps } from '../components/Modal/SingleActionModal';
 import {
+  DefaultWalletSelectModalProps,
+  WalletSelectModalProps,
+} from '../components/Modal/WalletSelectModal';
+import {
   AppActions,
   CLEAR_NOTIFICATIONS,
   DUAL_ACTION_MODAL,
@@ -21,6 +25,7 @@ import {
   SINGLE_ACTION_MODAL,
   UNSET_NOTIFICATION,
   UPDATE_STAKING_PAGE_INFO,
+  WALLET_SELECT_MODAL,
 } from './actions';
 
 interface DefaultState {
@@ -28,6 +33,7 @@ interface DefaultState {
   singleActionModal: SingleActionModalProps;
   dualActionModal: DualActionModalProps;
   dualActionWideModal: DualActionWideModalProps;
+  walletSelectModal: WalletSelectModalProps;
   stakingPageInfo?: StakingPageInfo;
 }
 
@@ -41,6 +47,9 @@ const initialState: DefaultState = {
   },
   dualActionWideModal: {
     ...DefaultDualActionWideModalProps,
+  },
+  walletSelectModal: {
+    ...DefaultWalletSelectModalProps,
   },
   stakingPageInfo: undefined,
 };
@@ -119,6 +128,16 @@ const StateProvider = ({ children }) => {
             ...state,
             stakingPageInfo: {
               ...action.payload,
+            },
+          };
+        case WALLET_SELECT_MODAL:
+          console.log(action, 'action');
+          return {
+            ...state,
+            walletSelectModal: {
+              ...state.walletSelectModal,
+              ...action.payload,
+              // visible: !state.walletSelectModal.visible,
             },
           };
         default:

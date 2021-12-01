@@ -1,8 +1,8 @@
-import { Web3Provider } from '@ethersproject/providers';
 import { Menu } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
 import { getChainLogo, switchNetwork } from '@popcorn/utils';
 import { useWeb3React } from 'components/Web3ModalReact';
+import { setSingleActionModal } from 'context/actions';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
@@ -11,8 +11,7 @@ import NavbarLink from './NavbarLinks';
 import NetworkOptionsMenu from './NetworkOptionsMenu';
 
 const Navbar: React.FC = () => {
-  const { chainId, account, activate, deactivate } =
-    useWeb3React<Web3Provider>();
+  const { chainId, account, activate, deactivate } = useWeb3React<any>();
   const router = useRouter();
   const [showGrants, setShowGrants] = useState(false);
   const [showProposals, setShowProposals] = useState(false);
@@ -86,33 +85,44 @@ const Navbar: React.FC = () => {
               switchNetwork={switchNetwork}
             />
           </Menu>
-
-          <button
-            className="ml-10 w-28 p-1 flex flex-row items-center justify-center border border-gray-400 rounded hover:bg-indigo-400 hover:text-white"
-            onClick={() => {
-              activate();
-              localStorage.setItem('eager_connect', 'true');
-            }}
-          >
-            <p>Connect{account && 'ed'}</p>
-            {account && (
-              <div className="w-2 h-2 bg-green-400 rounded-full ml-2" />
-            )}
-          </button>
-
-          <button
-            className="ml-10 w-28 p-1 flex flex-row items-center justify-center border border-gray-400 rounded hover:bg-indigo-400 hover:text-white"
-            onClick={() => {
-              deactivate();
-              localStorage.setItem('eager_connect', 'false');
-            }}
-            disabled={!account}
-          >
-            <p>disconnect</p>
-            {account && (
-              <div className="w-2 h-2 bg-green-400 rounded-full ml-2" />
-            )}
-          </button>
+          {!account ? (
+            <button
+              className="ml-10 w-28 p-1 flex flex-row items-center justify-center border border-gray-400 rounded hover:bg-indigo-400 hover:text-white"
+              onClick={() => {
+                activate((error) =>
+                  setSingleActionModal({
+                    title: 'Connection error',
+                    content: error?.message,
+                    visible: true,
+                    onConfirm: {
+                      label: 'OK',
+                      onClick: () => setSingleActionModal(false),
+                    },
+                  }),
+                );
+                localStorage.setItem('eager_connect', 'true');
+              }}
+            >
+              <p>Connect{account && 'ed'}</p>
+              {account && (
+                <div className="w-2 h-2 bg-green-400 rounded-full ml-2" />
+              )}
+            </button>
+          ) : (
+            <button
+              className="ml-10 w-28 p-1 flex flex-row items-center justify-center border border-gray-400 rounded hover:bg-indigo-400 hover:text-white"
+              onClick={() => {
+                deactivate();
+                localStorage.setItem('eager_connect', 'false');
+              }}
+              disabled={!account}
+            >
+              <p>disconnect</p>
+              {account && (
+                <div className="w-2 h-2 bg-green-400 rounded-full ml-2" />
+              )}
+            </button>
+          )}
         </div>
       </nav>
     </>

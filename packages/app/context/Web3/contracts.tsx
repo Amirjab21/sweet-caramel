@@ -107,11 +107,11 @@ export default function ContractsWrapper({
   const [contracts, setContracts] = useState<Contracts>();
   const { dispatch } = useContext(store);
 
-  useEffect(() => {
-    if (!active) {
-      activate();
-    }
-  }, [active]);
+  // useEffect(() => {
+  //   if (!active) {
+  //     activate();
+  //   }
+  // }, [active]);
 
   useEffect(() => {
     if (error) {

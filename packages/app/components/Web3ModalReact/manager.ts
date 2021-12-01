@@ -102,11 +102,17 @@ interface Web3ReactManagerState {
   provider?: any;
   chainId?: number;
   account?: null | string;
+  web3Provider?: any;
 
   onError?: (error: Error) => void;
 
   error?: Error;
 }
+
+const defaultErrorMessage = {
+  name: 'Default',
+  message: 'Connected to wallet failed.',
+};
 
 enum ActionType {
   ACTIVATE_CONNECTOR,
@@ -177,10 +183,10 @@ async function augmentConnectorUpdate(
   update: any,
 ): Promise<ConnectorUpdate<number>> {
   const provider = update;
-  const web3provider = new providers.Web3Provider(update);
-  const signer = await web3provider.getSigner();
+  const web3Provider = new providers.Web3Provider(update);
+  const signer = await web3Provider.getSigner();
   const account = await signer.getAddress();
-  const network = await web3provider.getNetwork();
+  const network = await web3Provider.getNetwork();
   const chainId = network.chainId;
   // const [_chainId, _account] = (await Promise.all([
   //   update.chainId === undefined ? connector.getChainId() : update.chainId,
@@ -196,75 +202,128 @@ async function augmentConnectorUpdate(
   }
   // const account = _account === null ? _account : normalizeAccount(_account);
 
-  return { provider, chainId, account };
+  return { provider, chainId, account, web3Provider };
 }
 
 export function useWeb3ReactManager(): Web3ReactManagerReturn {
   const [state, dispatch] = useReducer(reducer, {});
-  const { connector, provider, chainId, account, onError, error } = state;
+  const {
+    connector,
+    provider,
+    chainId,
+    account,
+    onError,
+    error,
+    web3Provider,
+  } = state;
+
+  const handleError = useCallback(async () => {
+    await web3Modal.toggleModal();
+    if (onError && typeof onError === 'function') {
+      return onError(defaultErrorMessage);
+    }
+    throw new Error('Failed to connect');
+  }, [onError]);
 
   let web3Modal;
   if (typeof window !== 'undefined') {
     web3Modal = new Web3Modal(providerOptions);
+    web3Modal.onError = handleError;
+    console.log(web3Modal);
   }
 
   const updateBusterRef = useRef(-1);
   updateBusterRef.current += 1;
 
-  const activate = useCallback(async (): // connector: AbstractConnector,
-  // onError?: (error: Error) => void,
-  // throwErrors: boolean = false
-  Promise<void> => {
-    const updateBusterInitial = updateBusterRef.current;
+  const activate = useCallback(
+    async (
+      onError?: (error: Error) => void,
+    ): // throwErrors: boolean = false
+    Promise<void> => {
+      const updateBusterInitial = updateBusterRef.current;
 
-    let activated = false;
-    try {
-      const update = await web3Modal.connect().then((update) => {
-        activated = true;
-        return update;
-      });
-      console.log('updateio');
+      let activated = false;
+      try {
+        const update = await web3Modal
+          .connect()
+          .then((update) => {
+            console.log('3', update);
+            activated = true;
+            return update;
+          })
+          .catch((err) => {
+            console.log(err, 'hee');
+            dispatch({ type: ActionType.ERROR, payload: { error, onError } });
+            throw new Error('failure');
+          });
 
-      const augmentedUpdate = await augmentConnectorUpdate(update);
+        // const update = await web3Modal.connectTo(providerId).then((update) => {
+        //   console.log('3', update)
+        //   activated = true;
+        //   return update;
+        // })
+        // .catch(err => {
+        //   console.log(err, 'hee');
+        //   dispatch({ type: ActionType.ERROR, payload: { error } });
+        //   throw new Error('failure')
+        // })
 
-      if (updateBusterRef.current > updateBusterInitial) {
-        throw new StaleConnectorError();
-      }
-      dispatch({
-        type: ActionType.ACTIVATE_CONNECTOR,
-        payload: { connector, ...augmentedUpdate, onError },
-      });
-    } catch (error) {
-      if (error instanceof StaleConnectorError) {
-        activated && connector.deactivate();
-        warning(false, `Suppressed stale connector activation ${connector}`);
-        // } else if (throwErrors) {
-        //   activated && connector.deactivate()
-        //   throw error
-      } else if (onError) {
-        activated && connector.deactivate();
-        onError(error);
-      } else {
+        // console.log(update, 'update')
+        const augmentedUpdate = await augmentConnectorUpdate(update);
+        console.log('4');
+        if (updateBusterRef.current > updateBusterInitial) {
+          console.log('5');
+          throw new StaleConnectorError();
+        }
+        dispatch({
+          type: ActionType.ACTIVATE_CONNECTOR,
+          payload: { connector, ...augmentedUpdate, onError },
+        });
+      } catch (error) {
+        console.log(error, 'error2');
+        await web3Modal.toggleModal();
+        // if (error instanceof StaleConnectorError) {
+        //   activated && connector.deactivate();
+        //   warning(false, `Suppressed stale connector activation ${connector}`);
+        //   // } else if (throwErrors) {
+        //   //   activated && connector.deactivate()
+        //   //   throw error
+        // } else if (onError) {
+        //   activated && connector.deactivate();
+        //   onError(error);
+        // } else {
         // we don't call activated && connector.deactivate() here because it'll be handled in the useEffect
+        onError(error);
         dispatch({
           type: ActionType.ERROR_FROM_ACTIVATION,
           payload: { connector, error },
         });
+        // }
       }
-    }
-  }, []);
+    },
+    [],
+  );
 
   const setError = useCallback((error: Error): void => {
     dispatch({ type: ActionType.ERROR, payload: { error } });
   }, []);
 
   const deactivate = useCallback(async (): Promise<void> => {
+    await web3Modal.clearCachedProvider();
     if (provider?.disconnect && typeof provider.disconnect === 'function') {
-      console.log('here', provider);
       await provider.disconnect();
     }
+    if (
+      web3Provider &&
+      web3Provider.provider &&
+      typeof web3Provider.provider.disconnect == 'function'
+    ) {
+      await web3Provider.provider.disconnect();
+    }
     dispatch({ type: ActionType.DEACTIVATE_CONNECTOR });
-    await web3Modal.clearCachedProvider();
+    setTimeout(() => {
+      window.location.reload();
+    }, 1);
   }, [provider]);
 
   const handleUpdate = useCallback(
@@ -333,14 +392,7 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
     },
     [provider, error, onError],
   );
-  const handleError = useCallback(
-    (error: Error): void => {
-      onError
-        ? onError(error)
-        : dispatch({ type: ActionType.ERROR, payload: { error } });
-    },
-    [onError],
-  );
+
   const handleDeactivate = useCallback((): void => {
     dispatch({ type: ActionType.DEACTIVATE_CONNECTOR });
   }, []);
@@ -377,15 +429,16 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
         console.log('disconnect', error);
         deactivate();
       };
-
+      provider.on('connect', () => console.log('ok'));
       provider.on('accountsChanged', handleAccountsChanged);
       provider.on('chainChanged', handleChainChanged);
       provider.on('disconnect', handleDisconnect);
+      provider.on('error', () => console.log('okedokes'));
 
       // Subscription Cleanup
       return () => {
         if (provider.removeListener) {
-          // provider.removeListener('accountsChanged', handleAccountsChanged)
+          provider.removeListener('accountsChanged', handleAccountsChanged);
           provider.removeListener('chainChanged', handleChainChanged);
           provider.removeListener('disconnect', handleDisconnect);
         }
