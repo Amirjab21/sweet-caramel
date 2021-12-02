@@ -65,7 +65,7 @@ export const WalletSelectModal: React.FC<WalletSelectModalProps> = ({
           <div className="flex z-30 justify-center items-center flex-col">
             {walletOptions.map((connector) => {
               return (
-                <div className="w-12" onClick={() => activate(connector)}>
+                <div className="w-12" onClick={() => activate()}>
                   <p className="text-center font-medium">{connector}</p>
                 </div>
               );
