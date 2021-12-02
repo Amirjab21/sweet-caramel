@@ -85,31 +85,29 @@ const Navbar: React.FC = () => {
               switchNetwork={switchNetwork}
             />
           </Menu>
-          {!account ? (
-            <button
-              className="ml-10 w-28 p-1 flex flex-row items-center justify-center border border-gray-400 rounded hover:bg-indigo-400 hover:text-white"
-              onClick={() => {
-                activate((error) =>
-                  setSingleActionModal({
-                    title: 'Connection error',
-                    content: error?.message,
-                    visible: true,
-                    onConfirm: {
-                      label: 'OK',
-                      onClick: () => setSingleActionModal(false),
-                    },
-                  }),
-                );
-                localStorage.setItem('eager_connect', 'true');
-              }}
-            >
-              <p>Connect{account && 'ed'}</p>
-              {account && (
-                <div className="w-2 h-2 bg-green-400 rounded-full ml-2" />
-              )}
-            </button>
-          ) : (
-            <button
+          <button
+            className="ml-10 w-28 p-1 flex flex-row items-center justify-center border border-gray-400 rounded hover:bg-indigo-400 hover:text-white"
+            onClick={() => {
+              activate((error) =>
+                setSingleActionModal({
+                  title: 'Connection error',
+                  content: error?.message,
+                  visible: true,
+                  onConfirm: {
+                    label: 'OK',
+                    onClick: () => setSingleActionModal(false),
+                  },
+                }),
+              );
+              localStorage.setItem('eager_connect', 'true');
+            }}
+          >
+            <p>Connect{account && 'ed'}</p>
+            {account && (
+              <div className="w-2 h-2 bg-green-400 rounded-full ml-2" />
+            )}
+          </button>
+          {/* <button
               className="ml-10 w-28 p-1 flex flex-row items-center justify-center border border-gray-400 rounded hover:bg-indigo-400 hover:text-white"
               onClick={() => {
                 deactivate();
@@ -121,8 +119,7 @@ const Navbar: React.FC = () => {
               {account && (
                 <div className="w-2 h-2 bg-green-400 rounded-full ml-2" />
               )}
-            </button>
-          )}
+            </button> */}
         </div>
       </nav>
     </>
