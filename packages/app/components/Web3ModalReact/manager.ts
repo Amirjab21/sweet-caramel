@@ -1,7 +1,6 @@
 import Portis from '@portis/web3';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import { AbstractConnector } from '@web3-react/abstract-connector';
-import { ConnectorUpdate } from '@web3-react/types';
 import Authereum from 'authereum';
 import { Bitski } from 'bitski';
 import { supportedChainIds } from 'context/Web3/connectors';
@@ -12,7 +11,7 @@ import { useCallback, useEffect, useReducer, useRef } from 'react';
 import warning from 'tiny-warning';
 import Web3Modal from 'web3modal';
 import { normalizeAccount, normalizeChainId } from './normalizers';
-import { Web3ReactManagerReturn } from './types';
+import { ConnectorUpdate, Web3ReactManagerReturn } from './types';
 
 const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad';
 

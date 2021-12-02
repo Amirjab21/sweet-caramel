@@ -28,3 +28,10 @@ export interface Web3ReactContextInterface<T = any>
   active: boolean;
   error?: Error;
 }
+
+export interface ConnectorUpdate<T = number | string> {
+  provider?: any;
+  chainId?: T;
+  account?: null | string;
+  web3Provider?: any;
+}
