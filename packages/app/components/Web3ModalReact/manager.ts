@@ -15,51 +15,47 @@ import { ConnectorUpdate, Web3ReactManagerReturn } from './types';
 
 const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad';
 
-const providerOptions = {
-  disabledInjectedProvider: true,
-  cacheProvider: false,
-  providerOptions: {
-    walletconnect: {
-      package: WalletConnectProvider,
-      options: {
-        bridge: 'https://polygon.bridge.walletconnect.org',
-        infuraId: INFURA_ID,
-        rpc: {
-          1: `https://mainnet.infura.io/v3/${INFURA_ID}`, // mainnet // For more WalletConnect providers: https://docs.walletconnect.org/quick-start/dapps/web3-provider#required
-          42: `https://kovan.infura.io/v3/${INFURA_ID}`,
-          100: 'https://dai.poa.network', // xDai
-        },
+export const providerOptions = {
+  walletconnect: {
+    package: WalletConnectProvider,
+    options: {
+      bridge: 'https://polygon.bridge.walletconnect.org',
+      infuraId: INFURA_ID,
+      rpc: {
+        1: `https://mainnet.infura.io/v3/${INFURA_ID}`, // mainnet // For more WalletConnect providers: https://docs.walletconnect.org/quick-start/dapps/web3-provider#required
+        42: `https://kovan.infura.io/v3/${INFURA_ID}`,
+        100: 'https://dai.poa.network', // xDai
       },
     },
-    portis: {
-      display: {
-        logo: 'https://user-images.githubusercontent.com/9419140/128913641-d025bc0c-e059-42de-a57b-422f196867ce.png',
-        name: 'Portis',
-        description: 'Connect to Portis App',
-      },
-      package: Portis,
-      options: {
-        id: 'e9dded09-79d3-4ae3-a659-761a51c95f9c',
-      },
+  },
+  portis: {
+    display: {
+      logo: 'https://user-images.githubusercontent.com/9419140/128913641-d025bc0c-e059-42de-a57b-422f196867ce.png',
+      name: 'Portis',
+      description: 'Connect to Portis App',
     },
-    fortmatic: {
-      package: Fortmatic, // required
-      options: {
-        key: 'pk_test_2FA53E901762CC1F',
-      },
+    package: Portis,
+    options: {
+      id: 'e9dded09-79d3-4ae3-a659-761a51c95f9c',
     },
-    authereum: {
-      package: Authereum, // required
+  },
+  fortmatic: {
+    package: Fortmatic, // required
+    options: {
+      key: 'pk_test_2FA53E901762CC1F',
     },
-    bitski: {
-      package: Bitski, // required
-      options: {
-        clientId: '20da1e93-1c5e-4e9e-ac8b-60e94508d90b', // required
-        callbackUrl:
-          typeof window !== 'undefined'
-            ? window.location.href + 'bitski-callback.html'
-            : null, // required
-      },
+  },
+  authereum: {
+    package: Authereum, // required
+  },
+  bitski: {
+    package: Bitski, // required
+    options: {
+      clientId: '20da1e93-1c5e-4e9e-ac8b-60e94508d90b', // required
+      callbackUrl:
+        typeof window !== 'undefined'
+          ? window.location.href + 'bitski-callback.html'
+          : null, // required
     },
   },
 };
@@ -119,8 +115,9 @@ function reducer(
 ): Web3ReactManagerState {
   switch (type) {
     case ActionType.ACTIVATE_CONNECTOR: {
-      const { connector, provider, chainId, account, onError } = payload;
-      return { connector, provider, chainId, account, onError };
+      const { connector, provider, chainId, account, onError, web3Provider } =
+        payload;
+      return { connector, provider, chainId, account, onError, web3Provider };
     }
     case ActionType.UPDATE: {
       const { provider, chainId, account } = payload;
@@ -195,7 +192,11 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
 
   let web3Modal;
   if (typeof window !== 'undefined') {
-    web3Modal = new Web3Modal(providerOptions);
+    web3Modal = new Web3Modal({
+      providerOptions,
+      disableInjectedProvider: false,
+      cacheProvider: false,
+    });
   }
 
   const activate = useCallback(
@@ -208,16 +209,23 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
       };
       web3Modal.onError = handleError;
 
-      let activated = false;
-      try {
-        const update = await web3Modal.connect().then((update) => {
-          console.log('3', update);
-          activated = true;
-          return update;
+      if (web3Modal.userOptions && web3Modal.userOptions.length === 1) {
+        web3Modal = new Web3Modal({
+          providerOptions,
+          disableInjectedProvider: false,
+          cacheProvider: false,
         });
+      }
+
+      if (provider) {
+        web3Modal.resetState();
+      }
+
+      try {
+        await web3Modal.clearCachedProvider();
+        let update = await web3Modal.connect();
 
         if (!update) {
-          console.log('failed');
           throw new Error('failed');
         }
 
@@ -227,7 +235,9 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
           payload: { connector, ...augmentedUpdate, onError },
         });
       } catch (error) {
-        await web3Modal.toggleModal();
+        if (error.includes('closed by user')) {
+          return;
+        }
         onError(error);
         dispatch({
           type: ActionType.ERROR_FROM_ACTIVATION,
@@ -235,7 +245,7 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
         });
       }
     },
-    [web3Modal, provider, web3Provider],
+    [web3Modal, provider, web3Provider, error],
   );
 
   const setError = useCallback((error: Error): void => {
@@ -255,9 +265,9 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
       await web3Provider.provider.disconnect();
     }
     dispatch({ type: ActionType.DEACTIVATE_CONNECTOR });
-    setTimeout(() => {
-      window.location.reload();
-    }, 1);
+    // setTimeout(() => {
+    //   window.location.reload();
+    // }, 1);
   }, [provider, web3Provider, web3Modal]);
 
   const handleUpdate = useCallback(
@@ -316,13 +326,14 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
   }, []);
 
   // ensure that connectors which were set are deactivated
-  useEffect((): (() => void) => {
-    return () => {
-      if (provider) {
-        deactivate();
-      }
-    };
-  }, [provider]);
+  // useEffect((): (() => void) => {
+  //   return () => {
+  //     if (provider) {
+  //       alert('fuck')
+  //       deactivate();
+  //     }
+  //   };
+  // }, [provider]);
 
   useEffect(() => {
     if (provider?.on) {
@@ -373,5 +384,6 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
     setError,
     deactivate,
     error,
+    web3Provider,
   };
 }

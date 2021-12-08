@@ -3,21 +3,21 @@ import { ChevronDownIcon } from '@heroicons/react/solid';
 import { getChainLogo, switchNetwork } from '@popcorn/utils';
 import { useWeb3React } from 'components/Web3ModalReact';
 import { setSingleActionModal } from 'context/actions';
+import useEagerConnect from 'hooks/useEagerConnect';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useState } from 'react';
 import { networkMap } from '../../context/Web3/connectors';
 import NavbarLink from './NavbarLinks';
 import NetworkOptionsMenu from './NetworkOptionsMenu';
-
 const Navbar: React.FC = () => {
-  const { chainId, account, activate, deactivate } = useWeb3React<any>();
+  const { chainId, account, activate } = useWeb3React<any>();
   const router = useRouter();
   const [showGrants, setShowGrants] = useState(false);
   const [showProposals, setShowProposals] = useState(false);
   const [currentChainName, setCurrentChainName] = useState('trial');
   const [currentChainIcon, setCurrentChainIcon] = useState('');
-  // const triedEagerConnect = useEagerConnect();
+  const triedEagerConnect = useEagerConnect();
 
   React.useEffect(() => {
     setCurrentChainName(networkMap[chainId]);
@@ -107,19 +107,9 @@ const Navbar: React.FC = () => {
               <div className="w-2 h-2 bg-green-400 rounded-full ml-2" />
             )}
           </button>
-          {/* <button
-              className="ml-10 w-28 p-1 flex flex-row items-center justify-center border border-gray-400 rounded hover:bg-indigo-400 hover:text-white"
-              onClick={() => {
-                deactivate();
-                localStorage.setItem('eager_connect', 'false');
-              }}
-              disabled={!account}
-            >
-              <p>disconnect</p>
-              {account && (
-                <div className="w-2 h-2 bg-green-400 rounded-full ml-2" />
-              )}
-            </button> */}
+          <div className="ml-10 w-28 p-1 flex flex-row items-center justify-center border border-gray-400 rounded hover:bg-indigo-400 hover:text-white">
+            <p>{`${account?.substring(0, 5)}...${account?.substring(37)}`}</p>
+          </div>
         </div>
       </nav>
     </>

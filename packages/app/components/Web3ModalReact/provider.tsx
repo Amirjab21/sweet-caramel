@@ -45,6 +45,7 @@ export function createWeb3ReactRoot(
       provider,
       chainId,
       account,
+      web3Provider,
 
       activate,
       setError,
@@ -72,8 +73,10 @@ export function createWeb3ReactRoot(
     const web3ReactContext: Web3ReactContextInterface = {
       connector,
       library,
+      provider,
       chainId,
       account,
+      web3Provider,
 
       activate,
       setError,
