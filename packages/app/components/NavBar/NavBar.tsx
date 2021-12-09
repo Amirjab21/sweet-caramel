@@ -102,13 +102,15 @@ const Navbar: React.FC = () => {
               localStorage.setItem('eager_connect', 'true');
             }}
           >
-            <p>Connect{account && 'ed'}</p>
+            <p>{account ? 'Switch' : 'Connect'}</p>
             {account && (
               <div className="w-2 h-2 bg-green-400 rounded-full ml-2" />
             )}
           </button>
           <div className="ml-10 w-28 p-1 flex flex-row items-center justify-center border border-gray-400 rounded hover:bg-indigo-400 hover:text-white">
-            <p>{`${account?.substring(0, 5)}...${account?.substring(37)}`}</p>
+            {account && (
+              <p>{`${account?.substring(0, 5)}...${account?.substring(37)}`}</p>
+            )}
           </div>
         </div>
       </nav>

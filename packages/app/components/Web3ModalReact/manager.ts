@@ -51,11 +51,9 @@ export const providerOptions = {
   bitski: {
     package: Bitski, // required
     options: {
-      clientId: '20da1e93-1c5e-4e9e-ac8b-60e94508d90b', // required
-      callbackUrl:
-        typeof window !== 'undefined'
-          ? window.location.href + 'bitski-callback.html'
-          : null, // required
+      clientId: 'f38e2e8a-a742-43bb-a2d3-571af0f021ee', // required
+      callbackUrl: 'http://localhost:3000/callback',
+      // required
     },
   },
 };
@@ -191,16 +189,30 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
   const onError = (error) => console.log(error);
 
   let web3Modal;
-  if (typeof window !== 'undefined') {
-    web3Modal = new Web3Modal({
-      providerOptions,
-      disableInjectedProvider: false,
-      cacheProvider: false,
-    });
-  }
+  // if (typeof window !== 'undefined') {
+
+  //   web3Modal = new Web3Modal({
+  //     providerOptions,
+  //     disableInjectedProvider: false,
+  //     cacheProvider: false,
+  //   });
+  // }
 
   const activate = useCallback(
     async (onError?: (error: Error) => void): Promise<void> => {
+      const Torus = (await import('@toruslabs/torus-embed')).default;
+
+      providerOptions['torus'] = { package: Torus };
+      providerOptions['bitski'].options.callbackUrl =
+        window.location.origin + '/callback';
+      console.log(providerOptions.bitski, 'sx');
+
+      web3Modal = new Web3Modal({
+        providerOptions,
+        disableInjectedProvider: false,
+        cacheProvider: false,
+      });
+
       const handleError = async () => {
         await web3Modal.toggleModal();
         if (onError && typeof onError === 'function') {
@@ -209,20 +221,7 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
       };
       web3Modal.onError = handleError;
 
-      if (web3Modal.userOptions && web3Modal.userOptions.length === 1) {
-        web3Modal = new Web3Modal({
-          providerOptions,
-          disableInjectedProvider: false,
-          cacheProvider: false,
-        });
-      }
-
-      if (provider) {
-        web3Modal.resetState();
-      }
-
       try {
-        await web3Modal.clearCachedProvider();
         let update = await web3Modal.connect();
 
         if (!update) {
@@ -235,6 +234,11 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
           payload: { connector, ...augmentedUpdate, onError },
         });
       } catch (error) {
+        console.log(error, 'error');
+        if (!error) {
+          onError({ message: 'unknown error', name: 'unknown' });
+          return;
+        }
         if (error.includes('closed by user')) {
           return;
         }
