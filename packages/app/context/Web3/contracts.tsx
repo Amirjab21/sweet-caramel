@@ -61,6 +61,8 @@ function getErrorMessage(error: Error) {
     }.`;
   } else if (error instanceof UserRejectedRequestErrorInjected) {
     return 'Please authorize this website to access your Ethereum account.';
+  } else if (error && error.name === 'Could not switch to this network') {
+    return 'Your current wallet does not support this network.';
   } else {
     console.error(error);
     return 'An unknown error occurred. Check the console for more details.';

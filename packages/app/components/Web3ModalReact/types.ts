@@ -8,6 +8,7 @@ export interface Web3ReactManagerFunctions {
   ) => Promise<void>;
   setError: (error: Error) => void;
   deactivate: () => void;
+  changeNetwork: (network: number) => Promise<void>;
 }
 
 export interface Web3ReactManagerReturn extends Web3ReactManagerFunctions {
@@ -26,7 +27,7 @@ export interface Web3ReactContextInterface<T = any>
   library?: T;
   chainId?: number;
   account?: null | string;
-  provider?: Web3Provider;
+  provider?: any;
   web3Provider?: Web3Provider;
 
   active: boolean;

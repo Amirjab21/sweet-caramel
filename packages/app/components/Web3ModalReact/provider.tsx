@@ -30,6 +30,9 @@ export function createWeb3ReactRoot(
     deactivate: () => {
       invariant(false, 'No <Web3ReactProvider ... /> found.');
     },
+    changeNetwork: () => {
+      invariant(false, 'No <Web3ReactProvider ... /> found.');
+    },
     active: false,
   });
   CONTEXTS[key].displayName = `Web3ReactContext - ${key}`;
@@ -50,6 +53,7 @@ export function createWeb3ReactRoot(
       activate,
       setError,
       deactivate,
+      changeNetwork,
 
       error,
     } = useWeb3ReactManager();
@@ -77,6 +81,7 @@ export function createWeb3ReactRoot(
       chainId,
       account,
       web3Provider,
+      changeNetwork,
 
       activate,
       setError,

@@ -1,7 +1,6 @@
 import Portis from '@portis/web3';
 import WalletConnectProvider from '@walletconnect/web3-provider';
 import { AbstractConnector } from '@web3-react/abstract-connector';
-import Authereum from 'authereum';
 import { Bitski } from 'bitski';
 import { supportedChainIds } from 'context/Web3/connectors';
 import { providers } from 'ethers';
@@ -14,6 +13,8 @@ import { normalizeAccount, normalizeChainId } from './normalizers';
 import { ConnectorUpdate, Web3ReactManagerReturn } from './types';
 
 const INFURA_ID = '460f40a260564ac4a4f4b3fffb032dad';
+const FORTMATIC_KEY = 'pk_test_2FA53E901762CC1F';
+const FORTMATIC_PRODUCTION_KEY = 'pk_live_97D6F04B0DB13919';
 
 export const providerOptions = {
   walletconnect: {
@@ -25,6 +26,7 @@ export const providerOptions = {
         1: `https://mainnet.infura.io/v3/${INFURA_ID}`, // mainnet // For more WalletConnect providers: https://docs.walletconnect.org/quick-start/dapps/web3-provider#required
         42: `https://kovan.infura.io/v3/${INFURA_ID}`,
         100: 'https://dai.poa.network', // xDai
+        137: 'https://api.mtpelerin.com/rpc/matic_mainnet',
       },
     },
   },
@@ -42,17 +44,24 @@ export const providerOptions = {
   fortmatic: {
     package: Fortmatic, // required
     options: {
-      key: 'pk_test_2FA53E901762CC1F',
+      key: FORTMATIC_PRODUCTION_KEY,
     },
   },
-  authereum: {
-    package: Authereum, // required
-  },
+  // authereum: {
+  //   package: Authereum, // required
+  // },
   bitski: {
     package: Bitski, // required
     options: {
       clientId: 'f38e2e8a-a742-43bb-a2d3-571af0f021ee', // required
-      callbackUrl: 'http://localhost:3000/callback',
+      callbackUrl:
+        'https://deploy-preview-40--sweet-caramel.netlify.app/callback',
+      extraProviderOptions: {
+        network: {
+          rpcUrl: 'https://api.bitski.com/v1/web3/mainnet',
+          chainId: 1,
+        },
+      },
       // required
     },
   },
@@ -100,6 +109,7 @@ enum ActionType {
   ERROR,
   ERROR_FROM_ACTIVATION,
   DEACTIVATE_CONNECTOR,
+  SWITCH_NETWORK,
 }
 
 interface Action {
@@ -134,6 +144,12 @@ function reducer(
         ...(chainId === undefined ? {} : { chainId }),
         ...(account === undefined ? {} : { account }),
         error: undefined,
+      };
+    }
+    case ActionType.SWITCH_NETWORK: {
+      return {
+        ...state,
+        ...payload,
       };
     }
     case ActionType.ERROR: {
@@ -202,10 +218,14 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
     async (onError?: (error: Error) => void): Promise<void> => {
       const Torus = (await import('@toruslabs/torus-embed')).default;
 
-      providerOptions['torus'] = { package: Torus };
+      providerOptions['torus'] = {
+        package: Torus,
+        options: {
+          networkParams: { host: 'mainnet' },
+        },
+      };
       providerOptions['bitski'].options.callbackUrl =
         window.location.origin + '/callback';
-      console.log(providerOptions.bitski, 'sx');
 
       web3Modal = new Web3Modal({
         providerOptions,
@@ -269,10 +289,234 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
       await web3Provider.provider.disconnect();
     }
     dispatch({ type: ActionType.DEACTIVATE_CONNECTOR });
-    // setTimeout(() => {
-    //   window.location.reload();
-    // }, 1);
+    setTimeout(() => {
+      window.location.reload();
+    }, 1);
   }, [provider, web3Provider, web3Modal]);
+
+  const changeNetwork = useCallback(
+    async (network: number) => {
+      // if (!provider) {
+      //   await activate();
+      //   return;
+      // }
+      if (
+        provider.apiBaseUrl &&
+        provider.apiBaseUrl === 'https://api.bitski.com/v1'
+      ) {
+        let networkOpts;
+        switch (network) {
+          case 137:
+            networkOpts = {
+              rpcUrl: 'https://api.bitski.com/v1/web3/polygon',
+              chainId: 137,
+            };
+            break;
+          case 4:
+            networkOpts = 'rinkeby';
+            break;
+          case 1:
+            networkOpts = 'mainnet';
+            break;
+          default:
+            dispatch({
+              type: ActionType.ERROR,
+              payload: {
+                error: {
+                  name: 'Could not switch to this network',
+                  message: 'This network may be unavailable on your wallet.',
+                },
+              },
+            });
+            onError({
+              name: 'Could not switch to this network',
+              message: 'This network may be unavailable on your wallet.',
+            });
+            break;
+        }
+
+        providerOptions.bitski.options['extraProviderOptions'] = {
+          network: networkOpts,
+        };
+
+        web3Modal = new Web3Modal({
+          providerOptions,
+          cacheProvider: false,
+          disableInjectedProvider: false,
+        });
+        const update = await web3Modal.connectTo('bitski');
+        const updatedThings = await augmentConnectorUpdate(update);
+        dispatch({
+          type: ActionType.SWITCH_NETWORK,
+          payload: { ...updatedThings },
+        });
+      }
+
+      if (provider.torus) {
+        const Torus = (await import('@toruslabs/torus-embed')).default;
+        let networkParams;
+        switch (network) {
+          case 137:
+            networkParams = { host: 'matic' };
+            break;
+          case 4:
+            networkParams = { host: 'rinkeby' };
+            break;
+          case 1:
+            networkParams = { host: 'mainnet' };
+            break;
+          default:
+            dispatch({
+              type: ActionType.ERROR,
+              payload: {
+                error: {
+                  name: 'Could not switch to this network',
+                  message: 'This network may be unavailable on your wallet.',
+                },
+              },
+            });
+            onError({
+              name: 'Could not switch to this network',
+              message: 'This network may be unavailable on your wallet.',
+            });
+            break;
+        }
+
+        providerOptions['torus'] = {
+          package: Torus,
+          options: {
+            networkParams: networkParams,
+          },
+        };
+
+        web3Modal = new Web3Modal({
+          providerOptions,
+          cacheProvider: false,
+          disableInjectedProvider: false,
+        });
+        const update = await web3Modal.connectTo('torus');
+        const updatedConnector = await augmentConnectorUpdate(update);
+        dispatch({
+          type: ActionType.SWITCH_NETWORK,
+          payload: { ...updatedConnector },
+        });
+      }
+
+      if (provider.isFortmatic) {
+        let customNodeOptions: any;
+        let fortmaticKey;
+        switch (network) {
+          case 137:
+            customNodeOptions = {
+              rpcUrl: 'https://testnet2.matic.network', // your own node url
+              chainId: 137, // chainId of your own node}
+            };
+            fortmaticKey = FORTMATIC_KEY;
+            break;
+          case 4:
+            customNodeOptions = 'rinkeby';
+            fortmaticKey = FORTMATIC_KEY;
+            break;
+          case 1:
+            customNodeOptions = null;
+            fortmaticKey = FORTMATIC_PRODUCTION_KEY;
+            break;
+          default:
+            dispatch({
+              type: ActionType.ERROR,
+              payload: {
+                error: {
+                  name: 'Could not switch to this network',
+                  message: 'This network may be unavailable on your wallet.',
+                },
+              },
+            });
+            onError({
+              name: 'Could not switch to this network',
+              message: 'This network may be unavailable on your wallet.',
+            });
+            break;
+        }
+
+        web3Modal = new Web3Modal({
+          providerOptions: {
+            ...providerOptions,
+            fortmatic: {
+              package: Fortmatic, // required
+              options: {
+                key: fortmaticKey,
+                network: customNodeOptions,
+              },
+            },
+          },
+          cacheProvider: false,
+          disableInjectedProvider: false,
+        });
+        const update = await web3Modal.connectTo('fortmatic');
+        const updatedThings = await augmentConnectorUpdate(update);
+        dispatch({
+          type: ActionType.SWITCH_NETWORK,
+          payload: { ...updatedThings },
+        });
+      }
+
+      if (provider.isPortis) {
+        let networkSelected;
+        switch (network) {
+          case 137:
+            networkSelected = 'matic';
+            break;
+          case 4:
+            networkSelected = 'rinkeby';
+            break;
+          case 1:
+            networkSelected = 'mainnet';
+            break;
+          default:
+            dispatch({
+              type: ActionType.ERROR,
+              payload: {
+                error: {
+                  name: 'Could not switch to this network',
+                  message: 'This network may be unavailable on your wallet.',
+                },
+              },
+            });
+            onError({
+              name: 'Could not switch to this network',
+              message: 'This network may be unavailable on your wallet.',
+            });
+            break;
+        }
+        // provider._portis.changeNetwork(network);
+        web3Modal = new Web3Modal({
+          providerOptions: {
+            ...providerOptions,
+            portis: {
+              display: {
+                logo: 'https://user-images.githubusercontent.com/9419140/128913641-d025bc0c-e059-42de-a57b-422f196867ce.png',
+                name: 'Portis',
+                description: 'Connect to Portis App',
+              },
+              package: Portis,
+              options: {
+                id: 'e9dded09-79d3-4ae3-a659-761a51c95f9c',
+                network: networkSelected,
+              },
+            },
+          },
+        });
+
+        const update = await web3Modal.connectTo('portis');
+        const updatedThings = await augmentConnectorUpdate(update);
+        dispatch({
+          type: ActionType.SWITCH_NETWORK,
+          payload: { ...updatedThings },
+        });
+      }
+    },
+    [provider, web3Modal, web3Provider],
+  );
 
   const handleUpdate = useCallback(
     async (update: ConnectorUpdate): Promise<void> => {
@@ -389,5 +633,6 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
     deactivate,
     error,
     web3Provider,
+    changeNetwork,
   };
 }
