@@ -1,6 +1,6 @@
 import { Menu } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/solid';
-import { getChainLogo, switchNetwork } from '@popcorn/utils';
+import { getChainLogo } from '@popcorn/utils';
 import { useWeb3React } from 'components/Web3ModalReact';
 import { setSingleActionModal } from 'context/actions';
 import useEagerConnect from 'hooks/useEagerConnect';
@@ -82,7 +82,7 @@ const Navbar: React.FC = () => {
             </Menu.Button>
             <NetworkOptionsMenu
               currentChain={chainId}
-              switchNetwork={switchNetwork}
+              // switchNetwork={switchNetwork}
             />
           </Menu>
           <button

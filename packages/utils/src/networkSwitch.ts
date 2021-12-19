@@ -1,3 +1,4 @@
+import { setSingleActionModal } from '../../app/context/actions';
 declare global {
   interface Window {
     ethereum: any;
@@ -71,7 +72,50 @@ export const connectToArbitrum = async () => {
     ],
   });
 };
-export const switchNetwork = (chainId: number) => {
+export const switchNetwork = (
+  chainId: number,
+  provider: any,
+  dispatch: React.Dispatch<any>,
+  activate: any,
+) => {
+  // if (!provider) {
+  //   return activate();
+  // }
+  // if (provider.isMetaMask) {
+  //   changeNetworkMetamask(chainId);
+  // }
+  // if (provider.wc) {
+  //   dispatch(
+  //       setSingleActionModal({
+  //         title: 'You must change network on your wallet app',
+  //         content: 'app',
+  //         visible: true,
+  //         onConfirm: {
+  //           label: 'OK',
+  //           onClick: () => dispatch(setSingleActionModal(false)),
+  //         },
+  //       }),
+  //     );
+  // }
+  // if (provider)
+};
+
+export const getChainLogo = (chainId: number) => {
+  switch (chainId) {
+    case 1:
+      return '/images/icons/ethLogo.png';
+    case 4:
+      return '/images/icons/ethLogo.png';
+    case 137:
+      return '/images/icons/polygonLogo.png';
+    case 80001:
+      return '/images/icons/polygonLogo.png';
+    case 42161:
+      return '/images/icons/arbLogo.png';
+  }
+};
+
+export function changeNetworkMetamask(chainId: number) {
   try {
     switch (chainId) {
       case 1:
@@ -89,20 +133,5 @@ export const switchNetwork = (chainId: number) => {
     }
   } catch (e) {
     console.error('Error while changing network', e);
-  }
-};
-
-export const getChainLogo = (chainId: number) => {
-  switch (chainId) {
-    case 1:
-      return "/images/icons/ethLogo.png"
-    case 4:
-      return "/images/icons/ethLogo.png"
-    case 137:
-      return "/images/icons/polygonLogo.png"
-    case 80001:
-      return "/images/icons/polygonLogo.png"
-    case 42161:
-      return "/images/icons/arbLogo.png"
   }
 }

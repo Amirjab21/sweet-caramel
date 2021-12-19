@@ -9,6 +9,7 @@ import { disconnect } from 'process';
 import { useCallback, useEffect, useReducer } from 'react';
 import warning from 'tiny-warning';
 import Web3Modal from 'web3modal';
+import { changeNetworkMetamask } from '../../../utils/src/networkSwitch';
 import { normalizeAccount, normalizeChainId } from './normalizers';
 import { ConnectorUpdate, Web3ReactManagerReturn } from './types';
 
@@ -110,6 +111,7 @@ enum ActionType {
   ERROR_FROM_ACTIVATION,
   DEACTIVATE_CONNECTOR,
   SWITCH_NETWORK,
+  SWITCH_NETWORK_ERROR,
 }
 
 interface Action {
@@ -147,6 +149,12 @@ function reducer(
       };
     }
     case ActionType.SWITCH_NETWORK: {
+      return {
+        ...state,
+        ...payload,
+      };
+    }
+    case ActionType.SWITCH_NETWORK_ERROR: {
       return {
         ...state,
         ...payload,
@@ -277,6 +285,14 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
   }, []);
 
   const deactivate = useCallback(async (): Promise<void> => {
+    if (provider.wc) {
+      await provider.close();
+      dispatch({ type: ActionType.DEACTIVATE_CONNECTOR });
+      setTimeout(() => {
+        window.location.reload();
+      }, 1);
+      return;
+    }
     await web3Modal.clearCachedProvider();
     if (provider?.disconnect && typeof provider.disconnect === 'function') {
       await provider.disconnect();
@@ -296,10 +312,32 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
 
   const changeNetwork = useCallback(
     async (network: number) => {
-      // if (!provider) {
-      //   await activate();
-      //   return;
-      // }
+      if (!provider) {
+        return activate();
+      }
+
+      if (provider.wc) {
+        deactivate();
+        dispatch({
+          type: ActionType.ERROR,
+          payload: {
+            error: {
+              name: 'WalletConnect Switch',
+              message:
+                'You need to change the wallet on your Wallet Connect app',
+            },
+          },
+        });
+        onError({
+          name: 'WalletConnect Switch',
+          message: 'You need to change the wallet on your Wallet Connect app',
+        });
+        return;
+      }
+
+      if (provider.isMetaMask) {
+        changeNetworkMetamask(network);
+      }
       if (
         provider.apiBaseUrl &&
         provider.apiBaseUrl === 'https://api.bitski.com/v1'
@@ -488,7 +526,6 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
             });
             break;
         }
-        // provider._portis.changeNetwork(network);
         web3Modal = new Web3Modal({
           providerOptions: {
             ...providerOptions,
@@ -577,7 +614,6 @@ export function useWeb3ReactManager(): Web3ReactManagerReturn {
   // useEffect((): (() => void) => {
   //   return () => {
   //     if (provider) {
-  //       alert('fuck')
   //       deactivate();
   //     }
   //   };

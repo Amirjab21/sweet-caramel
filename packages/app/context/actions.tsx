@@ -18,7 +18,6 @@ export const CLEAR_NOTIFICATIONS = 'notifications/CLEAR_NOTIFICATIONS';
 export const SINGLE_ACTION_MODAL = 'modals/SINGLE_ACTION_MODAL';
 export const DUAL_ACTION_MODAL = 'modals/DUAL_ACTION_MODAL';
 export const DUAL_ACTION_WIDE_MODAL = 'modals/DUAL_ACTION_WIDE_MODAL';
-export const WALLET_SELECT_MODAL = 'modals/WALLET_SELECT_MODAL';
 
 export const UPDATE_STAKING_PAGE_INFO = 'staking/UPDATE_STAKING_PAGE_INFO';
 
@@ -30,27 +29,12 @@ export type AppActions =
   | SetSingleActionModalAction
   | SetDualActionModalAction
   | SetDualActionWideModalAction
-  | UpdateStakingInfoAction
-  | SetWalletSelectModalAction;
+  | UpdateStakingInfoAction;
 
 export interface UpdateStakingInfoAction {
   type: typeof UPDATE_STAKING_PAGE_INFO;
   payload: StakingPageInfo;
 }
-
-export interface SetWalletSelectModalAction {
-  type: typeof WALLET_SELECT_MODAL;
-  payload: any;
-}
-
-export const SetWalletSelectModal = (
-  props: any,
-): SetWalletSelectModalAction => {
-  return {
-    type: WALLET_SELECT_MODAL,
-    payload: { ...props },
-  };
-};
 
 export const updateStakingPageInfo = (
   stakingInfo: StakingPageInfo | undefined,

@@ -1,47 +1,22 @@
 import { Menu, Transition } from '@headlessui/react';
 import { useWeb3React } from 'components/Web3ModalReact';
-import { setSingleActionModal } from 'context/actions';
 import { store } from 'context/store';
 import React, { Fragment, useContext } from 'react';
 
 interface NetworkOptionsMenuProps {
   currentChain: number;
-  switchNetwork: (chainId: number) => void;
+  // switchNetwork: (chainId: number) => void;
 }
 
 const NetworkOptionsMenu: React.FC<NetworkOptionsMenuProps> = ({
   currentChain,
-  switchNetwork,
+  // switchNetwork,
   ...props
 }) => {
   const { chainId, account, activate, provider, changeNetwork } =
     useWeb3React<any>();
   const { dispatch } = useContext(store);
 
-  function switchNetworkAllChains(chainNumber) {
-    if (!provider) {
-      activate();
-      return;
-    }
-    if (provider.wc) {
-      dispatch(
-        setSingleActionModal({
-          title: 'You must change network on your wallet app',
-          content: 'app',
-          visible: true,
-          onConfirm: {
-            label: 'OK',
-            onClick: () => dispatch(setSingleActionModal(false)),
-          },
-        }),
-      );
-    }
-    if (provider.isMetaMask) {
-      switchNetwork(chainNumber);
-    } else {
-      changeNetwork(chainNumber);
-    }
-  }
   return (
     <Transition
       as={Fragment}
@@ -60,7 +35,7 @@ const NetworkOptionsMenu: React.FC<NetworkOptionsMenuProps> = ({
               className={`${
                 active ? 'bg-gray-100' : 'bg-white'
               } group rounded-md items-center px-2 py-2 my-0 text-sm flex flex-row justify-between w-full h-6 cursor-pointer h-10`}
-              onClick={() => switchNetworkAllChains(1)}
+              onClick={() => changeNetwork(1)}
             >
               <div className="w-4.5 h-4 object-contain ml-3">
                 <img
@@ -84,7 +59,7 @@ const NetworkOptionsMenu: React.FC<NetworkOptionsMenuProps> = ({
               className={`${
                 active ? 'bg-gray-100' : 'bg-white'
               } group rounded-md items-center px-2 py-2 my-0 text-sm flex flex-row justify-between w-full h-6 cursor-pointer h-10`}
-              onClick={() => switchNetworkAllChains(4)}
+              onClick={() => changeNetwork(4)}
             >
               <div className="w-4.5 h-4 object-contain ml-3">
                 <img
@@ -108,7 +83,7 @@ const NetworkOptionsMenu: React.FC<NetworkOptionsMenuProps> = ({
               className={`${
                 active ? 'bg-gray-100' : 'bg-white'
               } group rounded-md items-center px-2 py-2 my-0 text-sm flex flex-row justify-between w-full h-6 cursor-pointer h-10`}
-              onClick={() => switchNetworkAllChains(137)}
+              onClick={() => changeNetwork(137)}
             >
               <div className="ml-3 w-4.5 h-4 ">
                 <img src={'/images/icons/polygonLogo.png'} alt={''} />
@@ -128,7 +103,7 @@ const NetworkOptionsMenu: React.FC<NetworkOptionsMenuProps> = ({
               className={`${
                 active ? 'bg-gray-100' : 'bg-white'
               } group rounded-md items-center px-2 py-2 my-0 text-sm flex flex-row justify-between w-full h-6 cursor-pointer h-10`}
-              onClick={() => switchNetworkAllChains(42161)}
+              onClick={() => changeNetwork(42161)}
             >
               <div className="w-4.5  ml-3">
                 <img src={'/images/icons/arbLogo.png'} alt={''} />
