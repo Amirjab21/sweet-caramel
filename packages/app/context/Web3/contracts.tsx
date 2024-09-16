@@ -1,5 +1,4 @@
-import { Web3Provider } from '@ethersproject/providers';
-import { UnsupportedChainIdError, useWeb3React } from '@web3-react/core';
+import { UnsupportedChainIdError } from '@web3-react/core';
 import {
   NoEthereumProviderError,
   UserRejectedRequestError as UserRejectedRequestErrorInjected,
@@ -12,10 +11,9 @@ import {
   StakingRewards,
   StakingRewards__factory,
 } from '../../../hardhat/typechain';
-import { setSingleActionModal } from '../actions';
 import { store } from '../store';
-import { connectors, networkMap } from './connectors';
-
+import { networkMap } from './connectors';
+import useWeb3Modal from './web3modal';
 export interface StakingContracts {
   pop: StakingRewards;
   popEthLp: StakingRewards;
@@ -58,81 +56,75 @@ function getErrorMessage(error: Error) {
 export default function ContractsWrapper({
   children,
 }: ContractsWrapperProps): JSX.Element {
-  const context = useWeb3React<Web3Provider>();
-  const {
-    connector,
-    library,
-    chainId,
-    account,
-    activate,
-    deactivate,
-    active,
-    error,
-  } = context;
+  const [loadWeb3Modal, logoutOfWeb3Modal, account] = useWeb3Modal();
   const [contracts, setContracts] = useState<Contracts>();
-  const { dispatch } = useContext(store);
+  const { dispatch, state } = useContext(store);
+  console.log(state, 'state');
+  const {
+    web3Provider: { provider },
+  } = state;
+
+  // useEffect(() => {
+  //   if (!account) {
+  //     loadWeb3Modal();
+  //   }
+  // }, [account]);
+
+  // useEffect(() => {
+  //   if (error) {
+  //     dispatch(
+  //       setSingleActionModal({
+  //         content: getErrorMessage(error),
+  //         title: 'Wallet Error',
+  //         visible: true,
+  //         type: 'error',
+  //         onConfirm: {
+  //           label: 'Close',
+  //           onClick: () => dispatch(setSingleActionModal(false)),
+  //         },
+  //       }),
+  //     );
+  //   }
+  // }, [error]);
 
   useEffect(() => {
-    if (!active) {
-      activate(connectors.Network);
-    }
-  }, [active]);
-
-  useEffect(() => {
-    if (error) {
-      dispatch(
-        setSingleActionModal({
-          content: getErrorMessage(error),
-          title: 'Wallet Error',
-          visible: true,
-          type: 'error',
-          onConfirm: {
-            label: 'Close',
-            onClick: () => dispatch(setSingleActionModal(false)),
-          },
-        }),
-      );
-    }
-  }, [error]);
-
-  useEffect(() => {
-    if (!library) {
+    if (!provider) {
       return;
     }
     const addresses = getContractAddresses();
     setContracts({
       pop: ERC20__factory.connect(
         addresses.POP[networkMap[process.env.CHAIN_ID]],
-        library,
+        provider,
       ),
       threeCrv: ERC20__factory.connect(
         addresses.THREE_CRV[networkMap[process.env.CHAIN_ID]],
-        library,
+        provider,
       ),
       popEthLp: ERC20__factory.connect(
         addresses.POP_ETH_LP[networkMap[process.env.CHAIN_ID]],
-        library,
+        provider,
       ),
       butter: ERC20__factory.connect(
         addresses.BUTTER[networkMap[process.env.CHAIN_ID]],
-        library,
+        provider,
       ),
       staking: {
         pop: StakingRewards__factory.connect(
           addresses.STAKE_POP[networkMap[process.env.CHAIN_ID]],
-          library,
+          provider,
         ),
         popEthLp: StakingRewards__factory.connect(
           addresses.STAKE_POP_ETH_LP[networkMap[process.env.CHAIN_ID]],
-          library,
+          provider,
         ),
         butter: StakingRewards__factory.connect(
           addresses.STAKE_BUTTER[networkMap[process.env.CHAIN_ID]],
-          library,
+          provider,
         ),
       },
     });
-  }, [library, active]);
+  }, [provider, account]);
 
   return (
     <ContractsContext.Provider

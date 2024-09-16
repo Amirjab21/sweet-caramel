@@ -1,4 +1,3 @@
-import { Web3Provider } from '@ethersproject/providers';
 import { Switch } from '@headlessui/react';
 import { ERC20, StakingRewards } from '@popcorn/hardhat/typechain';
 import {
@@ -7,19 +6,18 @@ import {
   getSingleStakingStats,
   SingleStakingStats,
 } from '@popcorn/utils';
-import { useWeb3React } from '@web3-react/core';
 import TokenInput from 'components/Common/TokenInput';
 import MainActionButton from 'components/MainActionButton';
 import Navbar from 'components/NavBar/NavBar';
 import StatInfoCard from 'components/StatInfoCard';
 import TokenIcon from 'components/TokenIcon';
-import { connectors } from 'context/Web3/connectors';
 import { Contracts, ContractsContext } from 'context/Web3/contracts';
 import { utils } from 'ethers';
 import { useRouter } from 'next/router';
 import 'rc-slider/assets/index.css';
 import { useContext, useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
+import useWeb3Modal from '../../context/Web3/web3modal';
 
 interface StakingInfo {
   inputToken: ERC20;
@@ -60,9 +58,8 @@ function getStakingInfo(id: string, contracts: Contracts): StakingInfo {
 export default function stake(): JSX.Element {
   const router = useRouter();
   const { id } = router.query;
-  const context = useWeb3React<Web3Provider>();
+  const [provider, loadWeb3Modal, logoutOfWeb3Modal, account] = useWeb3Modal();
   const { contracts } = useContext(ContractsContext);
-  const { library, account, activate, active } = context;
   const [stakingInfo, setStakingInfo] = useState<StakingInfo>();
   const [stakingStats, setStakingStats] = useState<SingleStakingStats>();
   const [inputTokenAmount, setInputTokenAmount] = useState<number>(0);
@@ -130,7 +127,7 @@ export default function stake(): JSX.Element {
     setWait(true);
     toast.loading(`Staking ${stakingInfo.tokenName}...`);
     const lockedPopInEth = utils.parseEther(inputTokenAmount.toString());
-    const signer = library.getSigner();
+    const signer = provider.getSigner();
     const connectedStaking = await stakingInfo.stakingContract.connect(signer);
     await connectedStaking
       .stake(lockedPopInEth)
@@ -162,7 +159,7 @@ export default function stake(): JSX.Element {
     setWait(true);
     toast.loading(`Withdrawing ${stakingInfo.tokenName}...`);
     const lockedPopInEth = utils.parseEther(inputTokenAmount.toString());
-    const signer = library.getSigner();
+    const signer = provider.getSigner();
     const connectedStaking = await stakingInfo.stakingContract.connect(signer);
     await connectedStaking
       .withdraw(lockedPopInEth)
@@ -197,7 +194,7 @@ export default function stake(): JSX.Element {
     // because parseEther breaks with exponential String
     const formattedToken = inputTokenAmount.toLocaleString().replace(/,/gi, '');
     const lockedTokenInEth = utils.parseEther(formattedToken);
-    const connected = await contracts.pop.connect(library.getSigner());
+    const connected = await contracts.pop.connect(provider.getSigner());
     await connected
       .approve(stakingInfo.stakingContract.address, lockedTokenInEth)
       .then((res) =>
@@ -340,7 +337,7 @@ export default function stake(): JSX.Element {
                     ) : (
                       <MainActionButton
                         label={'Connect Wallet'}
-                        handleClick={() => activate(connectors.Injected)}
+                        handleClick={() => loadWeb3Modal()}
                       />
                     )}
                   </div>

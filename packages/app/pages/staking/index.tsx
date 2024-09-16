@@ -1,5 +1,3 @@
-import { Web3Provider } from '@ethersproject/providers';
-import { useWeb3React } from '@web3-react/core';
 import Navbar from 'components/NavBar/NavBar';
 import StakeCard from 'components/StakeCard';
 import StatInfoCard from 'components/StatInfoCard';
@@ -12,6 +10,7 @@ import {
   getStakingStats,
   StakingStats,
 } from '../../../utils';
+import useWeb3Modal from '../../context/Web3/web3modal';
 
 interface TokenBalances {
   pop: number;
@@ -45,9 +44,9 @@ async function getUserBalances(
 }
 
 export default function index(): JSX.Element {
-  const context = useWeb3React<Web3Provider>();
+  const [provider, loadWeb3Modal, logoutOfWeb3Modal, account, web3Modal] =
+    useWeb3Modal();
   const { contracts } = useContext(ContractsContext);
-  const { library, account, activate, active } = context;
   const [balances, setBalances] = useState<Balances>();
   const [stakingStats, setStakingStats] = useState<StakingStats>();
 
@@ -65,6 +64,8 @@ export default function index(): JSX.Element {
     getUserBalances(account, contracts).then((res) => setBalances(res));
   }, [account, contracts]);
 
+  console.log(web3Modal, ' LOL');
+
   return (
     <div className="w-full h-screen">
       <Navbar />
@@ -77,6 +78,7 @@ export default function index(): JSX.Element {
               <p className="text-lg text-gray-500">
                 Earn more income staking your crypto with us
               </p>
+              <p onClick={() => web3Modal.clearCachedProvider()}>clear cache</p>
             </div>
             <div className="bg-primaryLight rounded-xl pt-10 mr-12 mt-12">
               <img

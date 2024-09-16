@@ -1,19 +1,17 @@
-import { Web3Provider } from '@ethersproject/providers';
 import { StakingRewards } from '@popcorn/hardhat/typechain';
 import { getEarned, getStakingStats, StakingStats } from '@popcorn/utils';
 import { TokenBalances } from '@popcorn/utils/getBalances';
-import { useWeb3React } from '@web3-react/core';
 import ClaimCard from 'components/ClaimCard';
 import Navbar from 'components/NavBar/NavBar';
 import StatInfoCard from 'components/StatInfoCard';
 import { ContractsContext } from 'context/Web3/contracts';
+import useWeb3Modal from 'context/Web3/web3modal';
 import { useContext, useEffect, useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
 export default function index(): JSX.Element {
-  const context = useWeb3React<Web3Provider>();
+  const [provider, account] = useWeb3Modal();
   const { contracts } = useContext(ContractsContext);
-  const { library, account, activate, active } = context;
   const [earned, setEarned] = useState<TokenBalances>();
   const [totalEarned, setTotalEarned] = useState<number>();
   const [stakingStats, setStakingStats] = useState<StakingStats>();
@@ -36,7 +34,7 @@ export default function index(): JSX.Element {
   async function claimReward(stakingContract: StakingRewards): Promise<void> {
     toast.loading(`Claiming POP Rewards...`);
     await stakingContract
-      .connect(library.getSigner())
+      .connect(provider.getSigner())
       .getReward()
       .then((res) =>
         res.wait().then((res) => {
